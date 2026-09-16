@@ -1104,7 +1104,7 @@ function setActiveSwatch(swatchElement, product, imgElement) {
     }
 }
 
-function createColorSwatches(product, imgElement) {
+/*function createColorSwatches(product, imgElement) {
     const wrapper = document.createElement('div');
     wrapper.className = 'color-swatches';
     if (product.customizable || product.parts) {
@@ -1175,7 +1175,75 @@ function createColorSwatches(product, imgElement) {
     });
 
     return wrapper;
-}
+}*/
+	
+	createColorSwatches(product, imgElement) {
+        const wrapper = document.createElement('div');
+        wrapper.className = 'color-swatches';
+
+        if (!product.colors || product.colors.length === 0) return wrapper;
+
+        let colors = [...product.colors];
+        const hasAll = colors.some(c => c.name === 'Все' || c.name === 'Стандарт');
+        if (!hasAll) {
+            colors.unshift({
+                name: 'Все',
+                hex: '#ffffff',
+                image: product.image
+            });
+        }
+
+        const getColorImageUrl = (color) => {
+            let image = color.image || product.image;
+            if (!image) return null;
+            if (image.startsWith('http') || image.startsWith('data:')) return image;
+            if (image.startsWith('//')) return 'https:' + image;
+            return CONFIG.GITHUB_BASE_URL + image.replace(/^\.?\//, '');
+        };
+
+        const setActiveSwatch = (swatch, color) => {
+            wrapper.querySelectorAll('.color-swatch').forEach(s => s.classList.remove('active-swatch'));
+            swatch.classList.add('active-swatch');
+            const imageUrl = getColorImageUrl(color);
+            if (imgElement) {
+                imgElement.src = imageUrl || 'https://via.placeholder.com/400x400/cccccc/666666?text=Нет+фото';
+                const card = imgElement.closest('.product-card');
+                if (card) Utils.scrollActiveSwatchIntoView(card);
+            }
+        };
+
+        colors.forEach((color, idx) => {
+            const swatch = document.createElement('span');
+            swatch.className = 'color-swatch' + (idx === 0 ? ' active-swatch' : '');
+            if (color.name === 'Белый/Чёрный') {
+                swatch.style.background = 'conic-gradient(#000000 0deg 180deg, #ffffff 180deg 360deg)';
+                swatch.style.border = '1px solid #888';
+            } else if (color.name === 'Все' || color.name === 'Стандарт') {
+                swatch.style.background = 'conic-gradient(red, yellow, lime, cyan, blue, magenta, red)';
+                swatch.style.border = '1px solid #888';
+            } else {
+                swatch.style.background = color.hex || '#cccccc';
+            }
+            swatch.dataset.colorName = color.name;
+            swatch.title = color.name;
+
+            swatch.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const colorObj = colors.find(c => c.name === swatch.dataset.colorName);
+                if (colorObj) setActiveSwatch(swatch, colorObj);
+            });
+
+            wrapper.appendChild(swatch);
+        });
+
+        const first = wrapper.querySelector('.color-swatch');
+        if (first) {
+            const colorObj = colors[0];
+            setActiveSwatch(first, colorObj);
+        }
+
+        return wrapper;
+    }
 
 async function loadCategoryIcons() {
     const categories = getCategories();
