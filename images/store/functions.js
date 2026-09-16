@@ -324,16 +324,6 @@ function selectCountry(country) {
     suggestions.style.display = 'none';
 }
 
-function getColorImageUrl(color, product) {
-    if (color.name === 'Все')
-        return product.image;
-    if (color.image && color.image.startsWith('http'))
-        return color.image;
-    if (color.image)
-        return color.image;
-    return `data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='400'%3E%3Crect width='400' height='400' fill='${encodeURIComponent(color.hex)}'/%3E%3C/svg%3E`;
-}
-
 function loadCart() {
     const saved = localStorage.getItem('firemag_cart');
     if (saved)
@@ -1085,25 +1075,6 @@ function getFilteredProducts() {
     return filtered;
 }
 
-function setActiveSwatch(swatchElement, product, imgElement) {
-    const parentSwatches = swatchElement.closest('.color-swatches');
-    if (parentSwatches) {
-        parentSwatches.querySelectorAll('.color-swatch').forEach(s => s.classList.remove('active-swatch'));
-        swatchElement.classList.add('active-swatch');
-    }
-    const colorName = swatchElement.dataset.colorName;
-    if (!colorName)
-        return;
-    const colorIndex = product.colors.findIndex(c => c.name === colorName);
-    if (colorIndex === -1)
-        return;
-    const color = product.colors[colorIndex];
-    const imageUrl = getColorImageUrl(color, product);
-    if (imgElement) {
-        imgElement.src = imageUrl || 'https://via.placeholder.com/400x400/cccccc/666666?text=Нет+фото';
-    }
-}
-
 /*function createColorSwatches(product, imgElement) {
     const wrapper = document.createElement('div');
     wrapper.className = 'color-swatches';
@@ -1135,7 +1106,7 @@ function setActiveSwatch(swatchElement, product, imgElement) {
 
         swatch.addEventListener('click', function(e) {
             e.stopPropagation();
-            setActiveSwatch(this, product, imgElement);
+            Utils.setActiveSwatch(this, product, imgElement);
         });
 
         if (isHoverSupported && !product.customizable) {
@@ -1177,73 +1148,47 @@ function setActiveSwatch(swatchElement, product, imgElement) {
     return wrapper;
 }*/
 	
-	createColorSwatches(product, imgElement) {
-        const wrapper = document.createElement('div');
-        wrapper.className = 'color-swatches';
+	function createColorSwatches(product, imgElement) {
+    const wrapper = document.createElement('div');
+    wrapper.className = 'color-swatches';
 
-        if (!product.colors || product.colors.length === 0) return wrapper;
+    if (!product.colors || product.colors.length === 0) return wrapper;
 
-        let colors = [...product.colors];
-        const hasAll = colors.some(c => c.name === 'Все' || c.name === 'Стандарт');
-        if (!hasAll) {
-            colors.unshift({
-                name: 'Все',
-                hex: '#ffffff',
-                image: product.image
-            });
+    let colors = [...product.colors];
+    const hasAll = colors.some(c => c.name === 'Все' || c.name === 'Стандарт');
+    if (!hasAll) {
+        colors.unshift({ name: 'Все', hex: '#ffffff', image: product.image });
+    }
+
+    colors.forEach((color, idx) => {
+        const swatch = document.createElement('span');
+        swatch.className = 'color-swatch' + (idx === 0 ? ' active-swatch' : '');
+
+        if (color.name === 'Белый/Чёрный') {
+            swatch.style.background = 'conic-gradient(#000000 0deg 180deg, #ffffff 180deg 360deg)';
+            swatch.style.border = '1px solid #888';
+        } else if (color.name === 'Все' || color.name === 'Стандарт') {
+            swatch.style.background = 'conic-gradient(red, yellow, lime, cyan, blue, magenta, red)';
+            swatch.style.border = '1px solid #888';
+        } else {
+            swatch.style.background = color.hex || '#cccccc';
         }
+        swatch.dataset.colorName = color.name;
+        swatch.title = color.name;
 
-        const getColorImageUrl = (color) => {
-            let image = color.image || product.image;
-            if (!image) return null;
-            if (image.startsWith('http') || image.startsWith('data:')) return image;
-            if (image.startsWith('//')) return 'https:' + image;
-            return CONFIG.GITHUB_BASE_URL + image.replace(/^\.?\//, '');
-        };
-
-        const setActiveSwatch = (swatch, color) => {
-            wrapper.querySelectorAll('.color-swatch').forEach(s => s.classList.remove('active-swatch'));
-            swatch.classList.add('active-swatch');
-            const imageUrl = getColorImageUrl(color);
-            if (imgElement) {
-                imgElement.src = imageUrl || 'https://via.placeholder.com/400x400/cccccc/666666?text=Нет+фото';
-                const card = imgElement.closest('.product-card');
-                if (card) Utils.scrollActiveSwatchIntoView(card);
-            }
-        };
-
-        colors.forEach((color, idx) => {
-            const swatch = document.createElement('span');
-            swatch.className = 'color-swatch' + (idx === 0 ? ' active-swatch' : '');
-            if (color.name === 'Белый/Чёрный') {
-                swatch.style.background = 'conic-gradient(#000000 0deg 180deg, #ffffff 180deg 360deg)';
-                swatch.style.border = '1px solid #888';
-            } else if (color.name === 'Все' || color.name === 'Стандарт') {
-                swatch.style.background = 'conic-gradient(red, yellow, lime, cyan, blue, magenta, red)';
-                swatch.style.border = '1px solid #888';
-            } else {
-                swatch.style.background = color.hex || '#cccccc';
-            }
-            swatch.dataset.colorName = color.name;
-            swatch.title = color.name;
-
-            swatch.addEventListener('click', (e) => {
-                e.stopPropagation();
-                const colorObj = colors.find(c => c.name === swatch.dataset.colorName);
-                if (colorObj) setActiveSwatch(swatch, colorObj);
-            });
-
-            wrapper.appendChild(swatch);
+        swatch.addEventListener('click', (e) => {
+            e.stopPropagation();
+            Utils.setActiveSwatch(swatch, product, imgElement);
         });
 
-        const first = wrapper.querySelector('.color-swatch');
-        if (first) {
-            const colorObj = colors[0];
-            setActiveSwatch(first, colorObj);
-        }
+        wrapper.appendChild(swatch);
+    });
 
-        return wrapper;
-    }
+    const first = wrapper.querySelector('.color-swatch');
+    if (first) Utils.setActiveSwatch(first, product, colors[0]);
+
+    return wrapper;
+}
 
 async function loadCategoryIcons() {
     const categories = getCategories();
@@ -1400,7 +1345,7 @@ function renderCatalog() {
             if (firstColor.name === 'Стандарт') {
                 initialImage = product.image;
             } else {
-                initialImage = getColorImageUrl(firstColor, product);
+                initialImage = Utils.getColorImageUrl(firstColor, product);
             }
         }
         img.src = initialImage || 'https://via.placeholder.com/400x400/cccccc/666666?text=Нет+фото';
@@ -1946,7 +1891,7 @@ function openModal(product, cardImgElement) {
             radio.addEventListener('change', function() {
                 const colorIndex = parseInt(this.dataset.colorIndex);
                 const colorData = product.colors[colorIndex];
-                const imageUrl = getColorImageUrl(colorData, product);
+                const imageUrl = Utils.getColorImageUrl(colorData, product);
                 modalImage.src = imageUrl || 'https://via.placeholder.com/400x400/cccccc/666666?text=Фото+недоступно';
                 if (currentCardImg)
                     currentCardImg.src = imageUrl;
@@ -2222,7 +2167,7 @@ function restoreModalHandlers(product) {
         radio.addEventListener('change', function() {
             const colorIndex = parseInt(this.dataset.colorIndex);
             const colorData = product.colors[colorIndex];
-            const imageUrl = getColorImageUrl(colorData, product);
+            const imageUrl = Utils.getColorImageUrl(colorData, product);
             const modalImage = document.getElementById('modalImage');
             modalImage.src = imageUrl || 'https://via.placeholder.com/400x400/cccccc/666666?text=Фото+недоступно';
             if (currentCardImg)
@@ -2387,6 +2332,60 @@ document.getElementById('modalAddToCartBtn').addEventListener('click', function(
 });
 
 const GITHUB_BASE_URL = 'https://an-core.github.io/frmfr_image/';
+
+const Utils = {
+    Utils.getColorImageUrl(color, product) {
+        if (!color) return product?.image || null;
+        if (color.name === 'Все' || color.name === 'Стандарт') {
+            return product?.image || null;
+        }
+        return color.image || product?.image || null;
+    },
+
+    Utils.setActiveSwatch(swatchElement, product, imgElement) {
+        if (!swatchElement || !product) return;
+
+        const parentSwatches = swatchElement.closest('.color-swatches');
+        if (parentSwatches) {
+            parentSwatches.querySelectorAll('.color-swatch')
+                .forEach(s => s.classList.remove('active-swatch'));
+            swatchElement.classList.add('active-swatch');
+        }
+
+        const colorName = swatchElement.dataset.colorName;
+        if (!colorName) return;
+
+        const color = (product.colors || []).find(c => c.name === colorName);
+        if (!color) return;
+
+        const imageUrl = Utils.getColorImageUrl(color, product);
+        if (imgElement) {
+            imgElement.src = imageUrl ||
+                'https://via.placeholder.com/400x400/cccccc/666666?text=Нет+фото';
+            const card = imgElement.closest('.product-card');
+            if (card) Utils.scrollActiveSwatchIntoView(card);
+        }
+    },
+
+    scrollActiveSwatchIntoView(card) {
+        if (!card) return;
+        const swatchesContainer = card.querySelector('.color-swatches');
+        if (!swatchesContainer) return;
+        const activeSwatch = swatchesContainer.querySelector('.color-swatch.active-swatch');
+        if (!activeSwatch) return;
+
+        const containerRect = swatchesContainer.getBoundingClientRect();
+        const swatchRect = activeSwatch.getBoundingClientRect();
+        const isVisible = swatchRect.left >= containerRect.left &&
+                          swatchRect.right <= containerRect.right;
+        if (!isVisible) {
+            const scrollLeft = swatchRect.left - containerRect.left +
+                swatchesContainer.scrollLeft -
+                (containerRect.width - swatchRect.width) / 2;
+            swatchesContainer.scrollTo({ left: scrollLeft, behavior: 'smooth' });
+        }
+    }
+};
 
 async function loadAllImages() {
     const catalog = document.getElementById('catalogContainer');
