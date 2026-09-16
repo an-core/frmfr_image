@@ -1185,7 +1185,7 @@ function getFilteredProducts() {
     });
 
     const first = wrapper.querySelector('.color-swatch');
-    if (first) Utils.setActiveSwatch(first, product, colors[0]);
+    if (first) Utils.setActiveSwatch(first, product, imgElement);
 
     return wrapper;
 }
