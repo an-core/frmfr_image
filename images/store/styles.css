@@ -1502,7 +1502,7 @@ body {
 
 .color-swatch.active-swatch {
     border-color: var(--price-color);
-    box-shadow: 0 0 0 2px var(--price-color), 0 2px 8px rgba(0, 0, 0, .15);
+    box-shadow: 0 0 0 1px var(--price-color), 0 2px 8px rgba(0, 0, 0, .15);
     transform: scale(1.05);
 }
 
