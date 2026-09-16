@@ -1075,80 +1075,7 @@ function getFilteredProducts() {
     return filtered;
 }
 
-/*function createColorSwatches(product, imgElement) {
-    const wrapper = document.createElement('div');
-    wrapper.className = 'color-swatches';
-    if (product.customizable || product.parts) {
-        return wrapper;
-    }
-    if (!product.colors || product.colors.length === 0)
-        return wrapper;
-
-    const label = document.createElement('span');
-    label.className = 'color-swatches-label';
-    label.textContent = '🎨';
-    wrapper.appendChild(label);
-
-    const colors = product.colors;
-    const isHoverSupported = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
-
-    colors.forEach((color, idx) => {
-        const swatch = document.createElement('span');
-        swatch.className = 'color-swatch' + (idx === 0 ? ' active-swatch' : '');
-        if (color.name === 'Стандарт') {
-            swatch.style.background = '#cccccc';
-            swatch.style.border = '2px solid #888';
-        } else {
-            swatch.style.background = color.hex;
-        }
-        swatch.dataset.colorName = color.name;
-        swatch.title = '';
-
-        swatch.addEventListener('click', function(e) {
-            e.stopPropagation();
-            Utils.setActiveSwatch(this, product, imgElement);
-        });
-
-        if (isHoverSupported && !product.customizable) {
-            const displayName = color.name === 'Стандарт' ? 'Все' : color.name;
-            swatch.addEventListener('mouseenter', function(e) {
-                const tooltip = document.getElementById('termTooltip');
-                if (!tooltip)
-                    return;
-                tooltip.textContent = displayName;
-                tooltip.classList.add('visible');
-
-                const rect = this.getBoundingClientRect();
-                let left = rect.left + rect.width / 2 - tooltip.offsetWidth / 2;
-                let top = rect.top - tooltip.offsetHeight - 1;
-
-                if (left < 10)
-                    left = 10;
-                if (left + tooltip.offsetWidth > window.innerWidth - 10) {
-                    left = window.innerWidth - tooltip.offsetWidth - 10;
-                }
-                if (top < 10) {
-                    top = rect.bottom + 10;
-                }
-
-                tooltip.style.left = left + 'px';
-                tooltip.style.top = top + 'px';
-            });
-
-            swatch.addEventListener('mouseleave', function() {
-                const tooltip = document.getElementById('termTooltip');
-                if (tooltip)
-                    tooltip.classList.remove('visible');
-            });
-        }
-
-        wrapper.appendChild(swatch);
-    });
-
-    return wrapper;
-}*/
-	
-	function createColorSwatches(product, imgElement) {
+function createColorSwatches(product, imgElement) {
     const wrapper = document.createElement('div');
     wrapper.className = 'color-swatches';
 
@@ -1157,7 +1084,11 @@ function getFilteredProducts() {
     let colors = [...product.colors];
     const hasAll = colors.some(c => c.name === 'Все' || c.name === 'Стандарт');
     if (!hasAll) {
-        colors.unshift({ name: 'Все', hex: '#ffffff', image: product.image });
+        colors.unshift({
+            name: 'Все',
+            hex: '#ffffff',
+            image: product.image
+        });
     }
 
     colors.forEach((color, idx) => {
@@ -1560,7 +1491,7 @@ function setupDragScroll() {
             container.style.cursor = 'grabbing';
         });
 
-container.addEventListener('mouseleave', () => {
+        container.addEventListener('mouseleave', () => {
             isDown = false;
             container.style.cursor = 'grab';
         });
@@ -1823,7 +1754,7 @@ function openModal(product, cardImgElement) {
             modalGallery.appendChild(thumb);
             thumbnailElements.push(thumb);
         });
-		initGalleryScrollArrow();
+        initGalleryScrollArrow();
 
         modalGallery.addEventListener('click', function(e) {
             const thumb = e.target.closest('.modal-gallery-thumb');
@@ -2218,7 +2149,7 @@ function closeModal() {
     currentModalProduct = null;
     currentCardImg = null;
     thumbnailElements = [];
-	document.querySelectorAll('.gallery-scroll-arrow').forEach(el => el.remove());
+    document.querySelectorAll('.gallery-scroll-arrow').forEach(el => el.remove());
     showAnnouncementAfterModal();
 }
 
@@ -2377,12 +2308,15 @@ const Utils = {
         const containerRect = swatchesContainer.getBoundingClientRect();
         const swatchRect = activeSwatch.getBoundingClientRect();
         const isVisible = swatchRect.left >= containerRect.left &&
-                          swatchRect.right <= containerRect.right;
+            swatchRect.right <= containerRect.right;
         if (!isVisible) {
             const scrollLeft = swatchRect.left - containerRect.left +
                 swatchesContainer.scrollLeft -
                 (containerRect.width - swatchRect.width) / 2;
-            swatchesContainer.scrollTo({ left: scrollLeft, behavior: 'smooth' });
+            swatchesContainer.scrollTo({
+                left: scrollLeft,
+                behavior: 'smooth'
+            });
         }
     }
 };
@@ -2544,9 +2478,9 @@ function initCatalogDropdown() {
     if (!desktopBtn || !dropdownContent) return;
 
     const catalogContainer = desktopBtn.closest('.dropdown-catalog');
-	let closeTimer = null;
+    let closeTimer = null;
 
-     function toggleCatalog(show) {
+    function toggleCatalog(show) {
         if (show) {
             clearTimeout(closeTimer);
             if (typeof closeAllDropdowns === 'function') closeAllDropdowns();
@@ -2908,7 +2842,7 @@ function closeCartModal() {
     if (!checkoutModal.classList.contains('active')) {
         showAnnouncementAfterModal();
     }
-	handleScroll();
+    handleScroll();
 }
 
 function closeCheckoutModal() {
@@ -2917,7 +2851,7 @@ function closeCheckoutModal() {
     submitOrderBtn.textContent = 'Отправить заказ';
     isSubmitting = false;
     showAnnouncementAfterModal();
-	handleScroll();
+    handleScroll();
 }
 cartIcon.addEventListener('click', openCartModal);
 cartCloseBtn.addEventListener('click', closeCartModal);
@@ -3020,19 +2954,19 @@ function handleScroll() {
     const headerWrapper = document.querySelector('.header-wrapper');
 
     if (!announcementBar || announcementBar.style.display === 'none') {
-    if (topBar) {
-        if (currentScrollY > lastScrollY && currentScrollY > 0) {
-            topBar.classList.add('hidden');
-            if (headerWrapper) headerWrapper.classList.add('hidden');
-        } else if (currentScrollY === 0) {
-            topBar.classList.remove('hidden');
-            if (headerWrapper) headerWrapper.classList.remove('hidden');
+        if (topBar) {
+            if (currentScrollY > lastScrollY && currentScrollY > 0) {
+                topBar.classList.add('hidden');
+                if (headerWrapper) headerWrapper.classList.add('hidden');
+            } else if (currentScrollY === 0) {
+                topBar.classList.remove('hidden');
+                if (headerWrapper) headerWrapper.classList.remove('hidden');
+            }
         }
+        lastScrollY = currentScrollY;
+        ticking = false;
+        return;
     }
-    lastScrollY = currentScrollY;
-    ticking = false;
-    return;
-}
 
     if (currentScrollY > lastScrollY && currentScrollY > 80) {
         if (topBar) topBar.classList.add('hidden');
@@ -3197,7 +3131,7 @@ function closeHowToBuy() {
         document.body.style.overflow = 'hidden';
         menuWasOpenBeforeModal = false;
     }
-	handleScroll();
+    handleScroll();
 }
 
 function openDelivery() {
@@ -3227,7 +3161,7 @@ function closeDelivery() {
         document.body.style.overflow = 'hidden';
         menuWasOpenBeforeModal = false;
     }
-	handleScroll();
+    handleScroll();
 }
 
 function closePickup() {
@@ -3241,7 +3175,7 @@ function closePickup() {
         document.body.style.overflow = 'hidden';
         menuWasOpenBeforeModal = false;
     }
-	handleScroll();
+    handleScroll();
 }
 
 function openJugglingNews() {
@@ -3263,7 +3197,7 @@ function closeJugglingNews() {
         document.body.style.overflow = 'hidden';
         menuWasOpenBeforeModal = false;
     }
-	handleScroll();
+    handleScroll();
 }
 
 function openFireNews() {
@@ -3285,7 +3219,7 @@ function closeFireNews() {
         document.body.style.overflow = 'hidden';
         menuWasOpenBeforeModal = false;
     }
-	handleScroll();
+    handleScroll();
 }
 
 function openFestivals() {
@@ -3307,7 +3241,7 @@ function closeFestivals() {
         document.body.style.overflow = 'hidden';
         menuWasOpenBeforeModal = false;
     }
-	handleScroll();
+    handleScroll();
 }
 
 if (howToBuyBtn) {
@@ -3795,7 +3729,7 @@ if (typeof addScrollButton === 'undefined') {
         freshDeliveryBtn.addEventListener('click', function(e) {
             e.preventDefault();
             e.stopPropagation();
-			
+
             const catalogDropdown = document.querySelector('.dropdown-content');
             if (catalogDropdown && catalogDropdown.classList.contains('show')) {
                 catalogDropdown.classList.remove('show');
@@ -3875,10 +3809,13 @@ function initGalleryScrollArrow() {
 
     function scrollGallery(direction) {
         const step = gallery.clientWidth * 0.85;
-        const target = direction === 'left'
-            ? Math.max(0, gallery.scrollLeft - step)
-            : Math.min(gallery.scrollWidth - gallery.clientWidth, gallery.scrollLeft + step);
-        gallery.scrollTo({ left: target, behavior: 'smooth' });
+        const target = direction === 'left' ?
+            Math.max(0, gallery.scrollLeft - step) :
+            Math.min(gallery.scrollWidth - gallery.clientWidth, gallery.scrollLeft + step);
+        gallery.scrollTo({
+            left: target,
+            behavior: 'smooth'
+        });
     }
 
     leftArrow.addEventListener('click', function(e) {
