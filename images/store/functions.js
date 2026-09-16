@@ -2334,7 +2334,7 @@ document.getElementById('modalAddToCartBtn').addEventListener('click', function(
 const GITHUB_BASE_URL = 'https://an-core.github.io/frmfr_image/';
 
 const Utils = {
-    Utils.getColorImageUrl(color, product) {
+    getColorImageUrl(color, product) {
         if (!color) return product?.image || null;
         if (color.name === 'Все' || color.name === 'Стандарт') {
             return product?.image || null;
@@ -2342,7 +2342,7 @@ const Utils = {
         return color.image || product?.image || null;
     },
 
-    Utils.setActiveSwatch(swatchElement, product, imgElement) {
+    setActiveSwatch(swatchElement, product, imgElement) {
         if (!swatchElement || !product) return;
 
         const parentSwatches = swatchElement.closest('.color-swatches');
