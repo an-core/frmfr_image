@@ -1920,7 +1920,6 @@ const DropdownCatalog = {
     _submenu: null,
     _categoriesList: null,
 
-    /* ================= ИНИЦИАЛИЗАЦИЯ ================= */
     init() {
         const desktopBtn = document.querySelector('.dropdown-btn');
         const mobileBtn = document.querySelector('.mobile-dropdown-btn');
@@ -1929,7 +1928,7 @@ const DropdownCatalog = {
 
         const catalogContainer = desktopBtn.closest('.dropdown-catalog');
 
-        // Строим список (и категории, и панель подменю)
+        // список (и категории, и панель подменю)
         this.populate();
 
         const toggle = (show) => {
@@ -1944,10 +1943,11 @@ const DropdownCatalog = {
                 DOM.categoriesRow?.classList.remove('shifted');
                 document.body.classList.remove('dropdown-open');
                 this.hideSubmenu();
+                this.closeMobileAccordions();
             }
         };
 
-        // Закрытие при уходе курсора со всей области каталога
+        // закрытие при уходе курсора со всей области каталога
         const handleLeave = (e) => {
             const related = e.relatedTarget;
             if (related && catalogContainer?.contains(related)) return;
@@ -1967,6 +1967,12 @@ const DropdownCatalog = {
         initHover();
         window.addEventListener('resize', initHover);
 
+        window.addEventListener('resize', Utils.debounce(() => {
+            if (window.innerWidth >= 768) {
+                this.closeMobileAccordions();
+            }
+        }, 200));
+
         // Клик по кнопке на мобильных
         desktopBtn.addEventListener('click', (e) => {
             if (window.innerWidth < 768) {
@@ -1975,6 +1981,7 @@ const DropdownCatalog = {
                 const isOpen = content.classList.toggle('show');
                 DOM.categoriesRow?.classList.toggle('shifted', isOpen);
                 document.body.classList.toggle('dropdown-open', isOpen);
+                if (!isOpen) this.closeMobileAccordions();
             }
         });
 
@@ -1984,9 +1991,10 @@ const DropdownCatalog = {
             const isOpen = content.classList.toggle('show');
             DOM.categoriesRow?.classList.toggle('shifted', isOpen);
             document.body.classList.toggle('dropdown-open', isOpen);
+            if (!isOpen) this.closeMobileAccordions();
         });
 
-        // Клик мимо - закрыть всё
+        // клик мимо - закрыть всё
         document.addEventListener('click', (e) => {
             if (e.target.closest('.dropdown-btn') ||
                 e.target.closest('.mobile-dropdown-btn') ||
@@ -2010,6 +2018,7 @@ const DropdownCatalog = {
                 CatalogUI.renderCatalog();
             }
             this.hideSubmenu();
+            this.closeMobileAccordions();
         });
     },
 
@@ -2027,29 +2036,30 @@ const DropdownCatalog = {
 
         const subs = CatalogUI.getSubcategories(cat);
 
-        // Если только «Все» — панель не нужна
         if (subs.length <= 1) {
             submenu.classList.remove('visible');
             submenu.innerHTML = '';
             return;
         }
 
-        // Строим содержимое
         submenu.innerHTML = '';
         subs.forEach(sub => {
-            const count = sub === 'Все'
-                ? State.products.filter(p => p.category === cat).length
-                : State.products.filter(p => p.category === cat && p.subcategory === sub).length;
+            const count = sub === 'Все' ?
+                State.products.filter(p => p.category === cat).length :
+                State.products.filter(p => p.category === cat && p.subcategory === sub).length;
 
             const item = Utils.el('div', {
                 className: 'dropdown-submenu-item' +
-                    (sub === State.activeSubcategory && State.activeCategory === cat
-                        ? ' active-sub' : ''),
-                attrs: { 'data-sub': sub, 'data-cat': cat },
+                    (sub === State.activeSubcategory && State.activeCategory === cat ?
+                        ' active-sub' : ''),
+                attrs: {
+                    'data-sub': sub,
+                    'data-cat': cat
+                },
             });
             item.innerHTML = `<span class="sub-name">${sub}</span><span class="sub-count">${count}</span>`;
 
-            // КЛИК по подкатегории
+            // клик по подкатегории
             item.addEventListener('click', (e) => {
                 e.stopPropagation();
                 e.preventDefault();
@@ -2061,13 +2071,16 @@ const DropdownCatalog = {
                 CatalogUI.renderSubcategories();
                 CatalogUI.renderCatalog();
                 this.syncActive();
-				
+
                 DOM.dropdownContent?.classList.remove('show');
                 DOM.categoriesRow?.classList.remove('shifted');
                 document.body.classList.remove('dropdown-open');
                 this.hideSubmenu();
 
-                DOM.catalogSection?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                DOM.catalogSection?.scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'start'
+                });
             });
 
             submenu.appendChild(item);
@@ -2092,16 +2105,100 @@ const DropdownCatalog = {
         }
     },
 
+    /* ─────────── Мобильный аккордеон ─────────── */
+
+    /** Раскрыть/свернуть подкатегории категории в мобильном dropdown */
+    toggleMobileAccordion(itemEl, cat) {
+        const isOpen = itemEl.classList.contains('accordion-open');
+
+        // Закрываем все остальные открытые аккордеоны
+        this.closeMobileAccordions();
+
+        // Если кликнули по уже открытому — просто свернули
+        if (isOpen) return;
+
+        // Открываем
+        itemEl.classList.add('accordion-open');
+
+        const subs = CatalogUI.getSubcategories(cat);
+        if (subs.length <= 1) return; // нет подкатегорий — нечего раскрывать
+
+        const subList = Utils.el('div', {
+            className: 'mobile-sub-list'
+        });
+
+        subs.forEach(sub => {
+            const count = sub === 'Все' ?
+                State.products.filter(p => p.category === cat).length :
+                State.products.filter(p => p.category === cat && p.subcategory === sub).length;
+
+            const isActive = sub === State.activeSubcategory && State.activeCategory === cat;
+
+            const subItem = Utils.el('div', {
+                className: 'mobile-sub-item' + (isActive ? ' active-sub' : ''),
+                attrs: {
+                    'data-sub': sub,
+                    'data-cat': cat
+                },
+            });
+            subItem.innerHTML = `<span class="sub-name">${sub}</span><span class="sub-count">${count}</span>`;
+
+            subItem.addEventListener('click', (e) => {
+                e.stopPropagation();
+                e.preventDefault();
+
+                State.activeCategory = cat;
+                State.activeSubcategory = sub;
+
+                CatalogUI.renderCategories();
+                CatalogUI.renderSubcategories();
+                CatalogUI.renderCatalog();
+                this.syncActive();
+
+                this.closeMobileAccordions();
+
+                DOM.dropdownContent?.classList.remove('show');
+                DOM.categoriesRow?.classList.remove('shifted');
+                document.body.classList.remove('dropdown-open');
+                DOM.catalogSection?.scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'start'
+                });
+            });
+
+            subList.appendChild(subItem);
+        });
+
+        itemEl.insertAdjacentElement('afterend', subList);
+    },
+
+    /** Свернуть все открытые аккордеоны */
+    closeMobileAccordions() {
+        if (!DOM.catalogDropdown) return;
+        Utils.$$('.category-item.accordion-open', DOM.catalogDropdown).forEach(el => {
+            el.classList.remove('accordion-open');
+            // Удаляем следующий за ним .mobile-sub-list, если он есть
+            const next = el.nextElementSibling;
+            if (next && next.classList.contains('mobile-sub-list')) {
+                next.remove();
+            }
+        });
+    },
+
     populate() {
         const container = DOM.catalogDropdown;
         if (!container) return;
         container.innerHTML = '';
 
-        // Обёртка: категории + подменю живут вместе
-        const wrap = Utils.el('div', { className: 'dropdown-hover-wrap' });
+        // Обёртка: категории + hover-подменю (для десктопа)
+        const wrap = Utils.el('div', {
+            className: 'dropdown-hover-wrap'
+        });
 
-        // Левая колонка — категории
-        const categoriesList = Utils.el('div', { className: 'dropdown-categories-list' });
+        // Список категорий
+        const categoriesList = Utils.el('div', {
+            className: 'dropdown-categories-list'
+        });
         this._categoriesList = categoriesList;
 
         const closeAndScroll = () => {
@@ -2109,18 +2206,38 @@ const DropdownCatalog = {
             DOM.categoriesRow?.classList.remove('shifted');
             document.body.classList.remove('dropdown-open');
             this.hideSubmenu();
-            DOM.catalogSection?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            DOM.catalogSection?.scrollIntoView({
+                behavior: 'smooth',
+                block: 'start'
+            });
         };
 
-        // «Все категории»
+        // ─── Пункт «Все категории» ───
         const allItem = Utils.el('div', {
             className: 'category-item' + (State.activeCategory === null ? ' active-drop' : ''),
             text: 'Все категории',
-            attrs: { 'data-category': '' },
+            attrs: {
+                'data-category': ''
+            },
         });
         allItem.style.color = 'var(--text-secondary)';
         allItem.addEventListener('click', (e) => {
             e.stopPropagation();
+
+            // На мобильных — просто фильтруем и закрываем
+            if (window.innerWidth < 768) {
+                State.activeCategory = null;
+                State.activeSubcategory = 'Все';
+                CatalogUI.renderCategories();
+                CatalogUI.renderSubcategories();
+                CatalogUI.renderCatalog();
+                this.syncActive();
+                this.closeMobileAccordions();
+                closeAndScroll();
+                return;
+            }
+
+            // На десктопе — старое поведение
             State.activeCategory = null;
             State.activeSubcategory = 'Все';
             CatalogUI.renderCategories();
@@ -2129,21 +2246,30 @@ const DropdownCatalog = {
             this.syncActive();
             closeAndScroll();
         });
-        // наведение на «Все категории» - прятать подменю
         allItem.addEventListener('mouseenter', () => this.hideSubmenu());
         categoriesList.appendChild(allItem);
 
-        // — Категории —
+        // ─── Категории ───
         CatalogUI.getCategories().forEach(cat => {
             const item = Utils.el('div', {
                 className: 'category-item' + (cat === State.activeCategory ? ' active-drop' : ''),
                 text: cat,
-                attrs: { 'data-category': cat },
+                attrs: {
+                    'data-category': cat
+                },
             });
             item.style.color = CATEGORY_TEXT_COLORS[cat] || 'var(--text-secondary)';
 
             item.addEventListener('click', (e) => {
                 e.stopPropagation();
+
+                // ─── Мобильный аккордеон ───
+                if (window.innerWidth < 768) {
+                    this.toggleMobileAccordion(item, cat);
+                    return;
+                }
+
+                // ─── Десктоп: старое поведение ───
                 State.activeCategory = cat;
                 State.activeSubcategory = 'Все';
                 CatalogUI.renderCategories();
@@ -2153,7 +2279,7 @@ const DropdownCatalog = {
                 closeAndScroll();
             });
 
-            // показать подменю
+            // Hover только на десктопе
             item.addEventListener('mouseenter', () => {
                 if (!this.isDesktopHover()) return;
                 this.showSubmenu(cat);
@@ -2164,11 +2290,13 @@ const DropdownCatalog = {
 
         wrap.appendChild(categoriesList);
 
-        const submenu = Utils.el('div', { className: 'dropdown-submenu' });
+        // ─── Панель подкатегорий для hover (десктоп) ───
+        const submenu = Utils.el('div', {
+            className: 'dropdown-submenu'
+        });
         wrap.appendChild(submenu);
         this._submenu = submenu;
 
-        // уход курсора с ОБЁРТКИ (скрытие через 250 мс)
         wrap.addEventListener('mouseleave', (e) => {
             if (!this.isDesktopHover()) return;
             if (e.relatedTarget && wrap.contains(e.relatedTarget)) return;
