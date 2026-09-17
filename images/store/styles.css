@@ -3683,7 +3683,7 @@ body,
         right: 8px;
         top: 50%;
         transform: translateY(-50%);
-        font-size: 0.85rem;
+        font-size: 1.1rem;
         opacity: 0.9;
         pointer-events: none;
         color: currentColor;
@@ -3696,7 +3696,7 @@ body,
         right: 8px;
         top: 50%;
         transform: translateY(-50%);
-        font-size: 0.85rem;
+        font-size: 1.1rem;
         opacity: 0.6;
         pointer-events: none;
         color: currentColor;
