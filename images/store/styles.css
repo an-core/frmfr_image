@@ -4096,7 +4096,7 @@ body,
         left: 50% !important;
         transform: translateX(-50%) !important;
         width: max-content !important;
-		min-width: 260px !important;
+		min-width: 320px !important;
         max-width: calc(100% - 20px) !important;
         max-height: calc(100vh - 90px) !important;
         overflow-y: auto !important;
