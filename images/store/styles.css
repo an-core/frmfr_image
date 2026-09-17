@@ -3651,7 +3651,7 @@ body,
     .dropdown-content .category-item.accordion-open::after {
         content: '▾';
         position: absolute;
-        right: 16px;
+        right: 8px;
         top: 50%;
         transform: translateY(-50%);
         font-size: 0.85rem;
@@ -3664,7 +3664,7 @@ body,
     .dropdown-content .category-item:not(.accordion-open):not([data-category=""])::after {
         content: '▸';
         position: absolute;
-        right: 16px;
+        right: 8px;
         top: 50%;
         transform: translateY(-50%);
         font-size: 0.85rem;
