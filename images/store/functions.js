@@ -1,13 +1,8 @@
-/* =========================================================================
- *  FIREMAG STORE — main.js
- *  Единый файл магазина. Модульная структура через IIFE.
- *  Автор рефакторинга: 2025
- * ========================================================================= */
 'use strict';
 
-/* =========================================================================
- *  КОНСТАНТЫ КОНФИГУРАЦИИ
- * ========================================================================= */
+/* 
+ *  КОНСТАНТЫ
+ */
 const CONFIG = Object.freeze({
     GITHUB_BASE_URL: 'https://an-core.github.io/frmfr_image/',
     JSON_CACHE_KEY: 'firemag_json_info',
@@ -17,12 +12,11 @@ const CONFIG = Object.freeze({
     THEME_KEY: 'theme',
     ANIM_KEY: 'firemag_anim',
     CATEGORIES_VISIBLE_KEY: 'firemag_show_categories',
-    CACHE_TTL_MS: 60 * 60 * 1000,      // 1 час
+    CACHE_TTL_MS: 60 * 60 * 1000,
     PICKUP_POINTS_URL: 'cdek-points.json',
     CATALOG_URL: 'catalog.json',
     LOGO_FILE: 'images/store/icons/logo.png',
-    ANNOUNCEMENT_TEXT:
-        'ВНИМАНИЕ! НОВЫЕ ПОСТУПЛЕНИЯ НА СКЛАД: Булавы от производителя Henrys - ' +
+    ANNOUNCEMENT_TEXT: 'ВНИМАНИЕ! НОВЫЕ ПОСТУПЛЕНИЯ НА СКЛАД: Булавы от производителя Henrys - ' +
         'Delphin Long, Delphin Short, Loop, Loop Grip, кольца Standard, а также мячи, ' +
         'бинбеги и чехлы от отечественного производителя!',
     DEFAULT_LOGO_URL: 'images/store/icons/logo.png',
@@ -33,27 +27,34 @@ const CONFIG = Object.freeze({
     MAX_SPECS_BEFORE_COLLAPSE: 15,
 });
 
-const PARTNERS = Object.freeze([
-    { name: 'Партнёр 1', file: 'images/store/icons/rosgos.png',       url: 'https://www.circus.ru' },
-    { name: 'Партнёр 2', file: 'images/store/icons/great-circus.png', url: 'https://www.greatcircus.ru' },
-    { name: 'Партнёр 3', file: 'images/store/icons/gutsei.png',       url: 'https://gutsei.ru' },
+const PARTNERS = Object.freeze([{
+        name: 'Партнёр 1',
+        file: 'images/store/icons/rosgos.png',
+        url: 'https://www.circus.ru'
+    },
+    {
+        name: 'Партнёр 2',
+        file: 'images/store/icons/great-circus.png',
+        url: 'https://www.greatcircus.ru'
+    },
+    {
+        name: 'Партнёр 3',
+        file: 'images/store/icons/gutsei.png',
+        url: 'https://gutsei.ru'
+    },
 ]);
 
 const GLOSSARY = Object.freeze({
-    'Радиосинхронизация':
-        'Радиосинхронизация позволяет синхронизировать несколько единиц реквизита по радиоканалу. ' +
+    'Радиосинхронизация': 'Радиосинхронизация позволяет синхронизировать несколько единиц реквизита по радиоканалу. ' +
         'Достаточно нажать кнопку на одном устройстве, и все остальные автоматически подстроятся под ' +
         'его режим, что упрощает управление шоу-программами.',
-    'Стабилизация изображения':
-        'Стабилизация изображения - это технология, которая автоматически подстраивает отображение ' +
+    'Стабилизация изображения': 'Стабилизация изображения - это технология, которая автоматически подстраивает отображение ' +
         'картинки под скорость вращения. Рисунок не растягивается и не сжимается, оставаясь чётким ' +
         'при любой частоте вращения.',
-    'Автоматизация':
-        'Автоматизация позволяет легко создавать шоу-программы: достаточно поместить нужные картинки ' +
+    'Автоматизация': 'Автоматизация позволяет легко создавать шоу-программы: достаточно поместить нужные картинки ' +
         'в папку, и устройство само составит программу с автоматическим переключением режимов через ' +
         'заданный интервал (по умолчанию 6 секунд).',
-    'Энергосбережение':
-        'Энергосберегающий режим продлевает время работы устройства в 3 раза при одном нажатии. ' +
+    'Энергосбережение': 'Энергосберегающий режим продлевает время работы устройства в 3 раза при одном нажатии. ' +
         'Особенно полезно на длительных выездах, фото- и видеосъёмках, а также при выступлениях в ' +
         'тёмных помещениях, где высокая яркость не требуется.',
     'Базовый вариант': 'Стафф конвертор + Пои, БЕЗ стабилизатора изображения, БЕЗ радиосинхронизации',
@@ -74,22 +75,22 @@ const CATEGORY_ORDER = Object.freeze([
 
 const CATEGORY_ICONS = Object.freeze({
     'Реквизит для жонглирования': 'images/store/icons/juggling.png',
-    'Реквизит для тренировок':    'images/store/icons/workout.png',
-    'Светодиодный реквизит':      'images/store/icons/led.png',
-    'Реквизит для фаершоу':       'images/store/icons/fire.png',
-    'Реквизит для эквилибра':     'images/store/icons/equilibre.png',
-    'Специальные предложения':    'images/store/icons/special_offer.png',
-    'Сертификаты':                'images/store/icons/certificate.png',
+    'Реквизит для тренировок': 'images/store/icons/workout.png',
+    'Светодиодный реквизит': 'images/store/icons/led.png',
+    'Реквизит для фаершоу': 'images/store/icons/fire.png',
+    'Реквизит для эквилибра': 'images/store/icons/equilibre.png',
+    'Специальные предложения': 'images/store/icons/special_offer.png',
+    'Сертификаты': 'images/store/icons/certificate.png',
 });
 
 const CATEGORY_TEXT_COLORS = Object.freeze({
     'Реквизит для жонглирования': '#ff00ff',
-    'Реквизит для фаершоу':       '#ff4500',
-    'Светодиодный реквизит':      '#00ffff',
-    'Реквизит для тренировок':    '#00cc66',
-    'Реквизит для эквилибра':     '#ffaa00',
-    'Сертификаты':                '#e84393',
-    'Специальные предложения':    '#00bfff',
+    'Реквизит для фаершоу': '#ff4500',
+    'Светодиодный реквизит': '#00ffff',
+    'Реквизит для тренировок': '#00cc66',
+    'Реквизит для эквилибра': '#ffaa00',
+    'Сертификаты': '#e84393',
+    'Специальные предложения': '#00bfff',
 });
 
 const COUNTRY_LIST = Object.freeze([
@@ -101,18 +102,26 @@ const COUNTRY_LIST = Object.freeze([
     'Чечня', 'Чувашия', 'Якутия (Республика Саха)',
 ]);
 
-/* =========================================================================
+/* 
  *  УТИЛИТЫ
- * ========================================================================= */
+ */
 const Utils = {
     /** Безопасный querySelector */
-    $(sel, root = document) { return root.querySelector(sel); },
+    $(sel, root = document) {
+        return root.querySelector(sel);
+    },
 
-    /** Безопасный querySelectorAll → массив */
-    $$(sel, root = document) { return Array.from(root.querySelectorAll(sel)); },
+    $$(sel, root = document) {
+        return Array.from(root.querySelectorAll(sel));
+    },
 
     /** Создать элемент с атрибутами/классами */
-    el(tag, { className, text, attrs = {}, style = {} } = {}) {
+    el(tag, {
+        className,
+        text,
+        attrs = {},
+        style = {}
+    } = {}) {
         const node = document.createElement(tag);
         if (className) node.className = className;
         if (text != null) node.textContent = text;
@@ -121,7 +130,6 @@ const Utils = {
         return node;
     },
 
-    /** Debounce */
     debounce(fn, wait = 300) {
         let t;
         return (...args) => {
@@ -153,31 +161,38 @@ const Utils = {
         return parseInt(String(str).replace(/[^0-9]/g, ''), 10) || 0;
     },
 
-    /** Безопасный JSON.parse с fallback */
     safeJSON(str, fallback = null) {
-        try { return JSON.parse(str); } catch { return fallback; }
+        try {
+            return JSON.parse(str);
+        } catch {
+            return fallback;
+        }
     },
 
-    /** Скачать текстовый файл с BOM (для Excel/Notepad) */
     downloadTextFile(filename, content) {
         const bom = new Uint8Array([0xEF, 0xBB, 0xBF]);
-        const blob = new Blob([bom, content], { type: 'text/plain;charset=utf-8' });
+        const blob = new Blob([bom, content], {
+            type: 'text/plain;charset=utf-8'
+        });
         const url = URL.createObjectURL(blob);
-        const link = Utils.el('a', { attrs: { href: url, download: filename } });
+        const link = Utils.el('a', {
+            attrs: {
+                href: url,
+                download: filename
+            }
+        });
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
         URL.revokeObjectURL(url);
     },
 
-    /** Получить URL картинки цвета */
     getColorImageUrl(color, product) {
         if (!color) return product?.image || null;
         if (color.name === 'Все' || color.name === 'Стандарт') return product?.image || null;
         return color.image || product?.image || null;
     },
 
-    /** Класс бейджа по тексту */
     getBadgeClass(badge) {
         if (!badge) return '';
         const b = badge.toLowerCase();
@@ -192,25 +207,21 @@ const Utils = {
         return '';
     },
 
-    /** Товар отсутствует? */
     isOutOfStock(product) {
         if (!product?.badge) return false;
         const b = product.badge.toLowerCase();
         return b.includes('закончился') || b.includes('нет в наличии');
     },
 
-    /** Хит? */
     isHit(product) {
         return !!product?.badge?.toLowerCase().includes('хит');
     },
 
-    /** Спеццена? */
     isSpecial(product) {
         const b = product?.badge?.toLowerCase() || '';
         return b.includes('спеццена') || b.includes('спец цена');
     },
 
-    /** Приоритет новинки */
     newPriority(badge) {
         if (!badge) return 0;
         const l = badge.toLowerCase();
@@ -220,9 +231,9 @@ const Utils = {
     },
 };
 
-/* =========================================================================
- *  ХРАНИЛИЩЕ СОСТОЯНИЯ (единственный источник правды)
- * ========================================================================= */
+/*
+ *  ХРАНИЛИЩЕ СОСТОЯНИЯ
+ */
 const State = {
     products: [],
     defaultProducts: [],
@@ -245,9 +256,9 @@ const State = {
     lastScrollY: 0,
 };
 
-/* =========================================================================
+/*
  *  DOM-КЭШ
- * ========================================================================= */
+ */
 const DOM = {};
 
 function cacheDOM() {
@@ -284,7 +295,9 @@ function cacheDOM() {
         'logoImage', 'menuLogo', 'mobileLogo',
         'partnersHeader', 'partnersCollapsible',
     ];
-    ids.forEach(id => { DOM[id] = document.getElementById(id); });
+    ids.forEach(id => {
+        DOM[id] = document.getElementById(id);
+    });
 
     DOM.headerWrapper = document.querySelector('.header-wrapper');
     DOM.partnersLogos = document.querySelector('.partners-logos');
@@ -297,9 +310,9 @@ function cacheDOM() {
     DOM.partnersArrow = document.querySelector('.partners-arrow');
 }
 
-/* =========================================================================
+/*
  *  СЕТЕВОЙ СЛОЙ
- * ========================================================================= */
+ */
 const Api = {
     async fetchJSON(url) {
         const res = await fetch(url);
@@ -353,7 +366,7 @@ const Api = {
 
         DOM.partnersLogos.innerHTML = '';
 
-        // Предзагрузка
+        // предзагрузка
         await Promise.all(PARTNERS.map(p => {
             const img = new Image();
             img.src = CONFIG.GITHUB_BASE_URL + p.file;
@@ -363,7 +376,11 @@ const Api = {
         const fragment = document.createDocumentFragment();
         for (const partner of PARTNERS) {
             const link = Utils.el('a', {
-                attrs: { href: partner.url, target: '_blank', rel: 'noopener noreferrer' },
+                attrs: {
+                    href: partner.url,
+                    target: '_blank',
+                    rel: 'noopener noreferrer'
+                },
             });
             const img = Utils.el('img', {
                 attrs: {
@@ -372,7 +389,7 @@ const Api = {
                     loading: 'eager',
                 },
             });
-            img.onerror = function () {
+            img.onerror = function() {
                 this.src = CONFIG.PLACEHOLDER_PARTNER + encodeURIComponent(partner.name);
             };
             link.appendChild(img);
@@ -381,7 +398,7 @@ const Api = {
         DOM.partnersLogos.appendChild(fragment);
     },
 
-    /** Загрузка точек СДЭК */
+    /** Загрузка пунктов СДЭК */
     async loadPickupPoints(city) {
         if (!city) return;
         try {
@@ -398,7 +415,12 @@ const Api = {
             select.innerHTML = '<option value="">-- выберите пункт --</option>';
             if (State.pickupPoints.length) {
                 for (const addr of State.pickupPoints) {
-                    const opt = Utils.el('option', { text: addr, attrs: { value: addr } });
+                    const opt = Utils.el('option', {
+                        text: addr,
+                        attrs: {
+                            value: addr
+                        }
+                    });
                     select.appendChild(opt);
                 }
             } else {
@@ -424,9 +446,9 @@ const Api = {
     },
 };
 
-/* =========================================================================
+/*
  *  КОРЗИНА
- * ========================================================================= */
+ */
 const Cart = {
     load() {
         const saved = localStorage.getItem(CONFIG.CART_KEY);
@@ -543,7 +565,10 @@ const Cart = {
         if (!item) return;
         const newQty = item.quantity + delta;
         if (newQty <= 0) this.remove(key);
-        else { item.quantity = newQty; this.save(); }
+        else {
+            item.quantity = newQty;
+            this.save();
+        }
     },
 
     totalItems() {
@@ -558,7 +583,11 @@ const Cart = {
     },
 
     updateUI() {
-        const { cartCount, cartEmptyHint, cartIconEl } = DOM;
+        const {
+            cartCount,
+            cartEmptyHint,
+            cartIconEl
+        } = DOM;
         if (!cartCount || !cartIconEl) return;
         const totalItems = this.totalItems();
         const totalSum = this.totalPrice();
@@ -576,9 +605,9 @@ const Cart = {
     },
 };
 
-/* =========================================================================
+/* 
  *  UI: КОРЗИНА (модалка)
- * ========================================================================= */
+ */
 const CartUI = {
     renderModal() {
         const container = DOM.cartItems;
@@ -601,7 +630,9 @@ const CartUI = {
             const optionsText = item.options?.length ? ` (+ ${item.options.map(o => o.name).join(', ')})` : '';
             const colorText = item.color ? ` (цвет: ${item.color.name})` : '';
 
-            const row = Utils.el('div', { className: 'cart-item' });
+            const row = Utils.el('div', {
+                className: 'cart-item'
+            });
             row.innerHTML = `
                 <div class="cart-item-info">
                     <img class="cart-item-thumb" src="${thumb}" alt="${item.name}" loading="lazy">
@@ -649,9 +680,9 @@ const CartUI = {
     },
 };
 
-/* =========================================================================
+/*
  *  UI: КАТАЛОГ
- * ========================================================================= */
+ */
 const CatalogUI = {
     getCategories() {
         const set = new Set(State.products.map(p => p.category));
@@ -669,9 +700,9 @@ const CatalogUI = {
         const target = category && category !== 'Все' ? category : null;
         const subs = new Set(
             State.products
-                .filter(p => !target || p.category === target)
-                .map(p => p.subcategory)
-                .filter(s => s && s.trim() !== '')
+            .filter(p => !target || p.category === target)
+            .map(p => p.subcategory)
+            .filter(s => s && s.trim() !== '')
         );
         return ['Все', ...Array.from(subs).sort()];
     },
@@ -719,12 +750,17 @@ const CatalogUI = {
         for (const cat of this.getCategories()) {
             const wrapper = Utils.el('div', {
                 className: 'category-icon-wrapper' + (cat === State.activeCategory ? ' active' : ''),
-                attrs: { 'data-category': cat },
+                attrs: {
+                    'data-category': cat
+                },
             });
 
             const img = Utils.el('img', {
                 className: 'category-icon-img',
-                attrs: { alt: cat, loading: 'lazy' },
+                attrs: {
+                    alt: cat,
+                    loading: 'lazy'
+                },
             });
             img.style.background = 'var(--bg-photo)';
 
@@ -736,7 +772,10 @@ const CatalogUI = {
                 this.setIconFallback(img, cat);
             }
 
-            const label = Utils.el('span', { className: 'category-icon-label', text: cat });
+            const label = Utils.el('span', {
+                className: 'category-icon-label',
+                text: cat
+            });
 
             wrapper.appendChild(img);
             wrapper.appendChild(label);
@@ -781,7 +820,9 @@ const CatalogUI = {
             const btn = Utils.el('button', {
                 className: 'subcategory-btn' + (sub === State.activeSubcategory ? ' active' : ''),
                 text: sub,
-                attrs: { 'data-subcategory': sub },
+                attrs: {
+                    'data-subcategory': sub
+                },
             });
             btn.addEventListener('click', () => {
                 State.activeSubcategory = sub;
@@ -822,12 +863,16 @@ const CatalogUI = {
     },
 
     createCard(product) {
-        const card = Utils.el('div', { className: 'product-card' });
+        const card = Utils.el('div', {
+            className: 'product-card'
+        });
 
-        // --- Фото + бейджи ---
+        // фото + бейджи
         const photoWrap = Utils.el('div', {
             className: 'photo-wrapper',
-            attrs: { 'data-id': product.id },
+            attrs: {
+                'data-id': product.id
+            },
         });
 
         if (product.badge) {
@@ -843,21 +888,33 @@ const CatalogUI = {
         });
         photoWrap.appendChild(img);
 
-        // --- Инфо ---
-        const info = Utils.el('div', { className: 'card-info' });
+        // инфо
+        const info = Utils.el('div', {
+            className: 'card-info'
+        });
 
-        const name = Utils.el('div', { className: 'product-name', text: product.name });
-        const price = Utils.el('div', { className: 'product-price', text: product.price });
+        const name = Utils.el('div', {
+            className: 'product-name',
+            text: product.name
+        });
+        const price = Utils.el('div', {
+            className: 'product-price',
+            text: product.price
+        });
 
-        const tag = Utils.el('div', { className: 'product-category-tag' });
+        const tag = Utils.el('div', {
+            className: 'product-category-tag'
+        });
         tag.appendChild(this.createCategoryLink(product));
         if (product.subcategory) {
             tag.appendChild(document.createTextNode(' › '));
             tag.appendChild(this.createSubcategoryLink(product));
         }
 
-        // --- Кнопка "в корзину" ---
-        const addIcon = Utils.el('button', { className: 'add-to-cart-icon' });
+        // кнопка "в корзину"
+        const addIcon = Utils.el('button', {
+            className: 'add-to-cart-icon'
+        });
         addIcon.innerHTML = `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:block;"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>`;
         addIcon.setAttribute('aria-label', 'Добавить в корзину');
         addIcon.title = 'Добавить в корзину';
@@ -872,7 +929,10 @@ const CatalogUI = {
                 let selectedColor = null;
                 if (activeSwatch?.dataset.colorName) {
                     const colorData = product.colors?.find(c => c.name === activeSwatch.dataset.colorName);
-                    if (colorData) selectedColor = { name: colorData.name, hex: colorData.hex };
+                    if (colorData) selectedColor = {
+                        name: colorData.name,
+                        hex: colorData.hex
+                    };
                 }
                 Cart.addWithColor(product, selectedColor);
             });
@@ -883,7 +943,9 @@ const CatalogUI = {
             info.appendChild(colorSwatches);
         }
 
-        const priceCartWrapper = Utils.el('div', { className: 'price-cart-wrapper' });
+        const priceCartWrapper = Utils.el('div', {
+            className: 'price-cart-wrapper'
+        });
         priceCartWrapper.style.cssText = 'display:flex;justify-content:space-between;align-items:center;margin-top:auto;';
         priceCartWrapper.appendChild(price);
         priceCartWrapper.appendChild(addIcon);
@@ -906,7 +968,10 @@ const CatalogUI = {
     },
 
     createCategoryLink(product) {
-        const span = Utils.el('span', { className: 'category-link', text: product.category });
+        const span = Utils.el('span', {
+            className: 'category-link',
+            text: product.category
+        });
         span.style.cssText = 'cursor:pointer;text-decoration:underline dotted var(--text-hint);text-underline-offset:2px;pointer-events:auto;';
         span.addEventListener('click', (e) => {
             e.stopPropagation();
@@ -916,13 +981,19 @@ const CatalogUI = {
             this.renderCategories();
             this.renderSubcategories();
             this.renderCatalog();
-            DOM.catalogSection?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            DOM.catalogSection?.scrollIntoView({
+                behavior: 'smooth',
+                block: 'start'
+            });
         });
         return span;
     },
 
     createSubcategoryLink(product) {
-        const span = Utils.el('span', { className: 'subcategory-link', text: product.subcategory });
+        const span = Utils.el('span', {
+            className: 'subcategory-link',
+            text: product.subcategory
+        });
         span.style.cssText = 'cursor:pointer;text-decoration:underline dotted var(--text-hint);text-underline-offset:2px;pointer-events:auto;';
         span.addEventListener('click', (e) => {
             e.stopPropagation();
@@ -932,15 +1003,22 @@ const CatalogUI = {
             this.renderCategories();
             this.renderSubcategories();
             this.renderCatalog();
-            DOM.catalogSection?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            DOM.catalogSection?.scrollIntoView({
+                behavior: 'smooth',
+                block: 'start'
+            });
         });
         return span;
     },
 
     appendBadges(container, badgeString) {
         const badges = badgeString.split(',').map(s => s.trim()).filter(Boolean);
-        const left = Utils.el('div', { className: 'badge-left' });
-        const right = Utils.el('div', { className: 'badge-right' });
+        const left = Utils.el('div', {
+            className: 'badge-left'
+        });
+        const right = Utils.el('div', {
+            className: 'badge-right'
+        });
 
         for (const b of badges) {
             const el = Utils.el('div', {
@@ -958,22 +1036,31 @@ const CatalogUI = {
     },
 };
 
-/* =========================================================================
- *  UI: ЦВЕТОВЫЕ ПЕРЕКЛЮЧАТЕЛИ
- * ========================================================================= */
+/*
+ *  UI: ЦВЕТОВЫЕ ПЕРЕКЛЮЧАТЕЛИ (цветные кружки на лицевой стороне карточки товара)
+ */
 const ColorSwatches = {
     create(product, imgElement) {
-        const wrapper = Utils.el('div', { className: 'color-swatches' });
+        const wrapper = Utils.el('div', {
+            className: 'color-swatches'
+        });
         if (!product.colors?.length) return wrapper;
 
         let colors = [...product.colors];
         const hasAll = colors.some(c => c.name === 'Все' || c.name === 'Стандарт');
-        if (!hasAll) colors.unshift({ name: 'Все', hex: '#ffffff', image: product.image });
+        if (!hasAll) colors.unshift({
+            name: 'Все',
+            hex: '#ffffff',
+            image: product.image
+        });
 
         colors.forEach((color, idx) => {
             const swatch = Utils.el('span', {
                 className: 'color-swatch' + (idx === 0 ? ' active-swatch' : ''),
-                attrs: { 'data-color-name': color.name, title: color.name },
+                attrs: {
+                    'data-color-name': color.name,
+                    title: color.name
+                },
             });
 
             if (color.name === 'Белый/Чёрный') {
@@ -1033,7 +1120,10 @@ const ColorSwatches = {
         if (!visible) {
             const scrollLeft = sRect.left - cRect.left + container.scrollLeft -
                 (cRect.width - sRect.width) / 2;
-            container.scrollTo({ left: scrollLeft, behavior: 'smooth' });
+            container.scrollTo({
+                left: scrollLeft,
+                behavior: 'smooth'
+            });
         }
     },
 
@@ -1042,7 +1132,9 @@ const ColorSwatches = {
             if (container.dataset.dragBound) return;
             container.dataset.dragBound = '1';
 
-            let isDown = false, startX = 0, scrollLeft = 0;
+            let isDown = false,
+                startX = 0,
+                scrollLeft = 0;
             container.style.cursor = 'grab';
 
             container.addEventListener('mousedown', (e) => {
@@ -1051,8 +1143,14 @@ const ColorSwatches = {
                 scrollLeft = container.scrollLeft;
                 container.style.cursor = 'grabbing';
             });
-            container.addEventListener('mouseleave', () => { isDown = false; container.style.cursor = 'grab'; });
-            container.addEventListener('mouseup', () => { isDown = false; container.style.cursor = 'grab'; });
+            container.addEventListener('mouseleave', () => {
+                isDown = false;
+                container.style.cursor = 'grab';
+            });
+            container.addEventListener('mouseup', () => {
+                isDown = false;
+                container.style.cursor = 'grab';
+            });
             container.addEventListener('mousemove', (e) => {
                 if (!isDown) return;
                 e.preventDefault();
@@ -1063,9 +1161,9 @@ const ColorSwatches = {
     },
 };
 
-/* =========================================================================
+/*
  *  UI: МОДАЛКА ТОВАРА
- * ========================================================================= */
+ */
 const Modal = {
     _checkboxes: [],
     _selectedVariantPrice: 0,
@@ -1202,7 +1300,9 @@ const Modal = {
             const termEl = Utils.el('span', {
                 className: 'term',
                 text: termName,
-                attrs: { 'data-term': termName },
+                attrs: {
+                    'data-term': termName
+                },
             });
 
             termEl.addEventListener('click', (e) => {
@@ -1262,7 +1362,7 @@ const Modal = {
         }
         gallery.style.display = 'flex';
 
-        // Подсчёт индексов цветов
+        // подсчёт индексов цветов
         const colorIndexByImage = new Map();
         (product.colors || []).forEach((c, ci) => {
             if (c.name === 'Стандарт') return;
@@ -1272,10 +1372,16 @@ const Modal = {
         allImages.forEach((src, index) => {
             const thumb = Utils.el('img', {
                 className: 'modal-gallery-thumb' + (index === 0 ? ' active' : ''),
-                attrs: { src, alt: `Фото ${index + 1}`, loading: 'lazy' },
+                attrs: {
+                    src,
+                    alt: `Фото ${index + 1}`,
+                    loading: 'lazy'
+                },
             });
             thumb.dataset.url = src;
-            thumb.onerror = function () { this.src = CONFIG.PLACEHOLDER_PRODUCT; };
+            thumb.onerror = function() {
+                this.src = CONFIG.PLACEHOLDER_PRODUCT;
+            };
 
             let colorIdx = -1;
             if (index === 0) colorIdx = 0;
@@ -1343,14 +1449,23 @@ const Modal = {
 
         const scroll = (dir) => {
             const step = gallery.clientWidth * 0.85;
-            const target = dir === 'left'
-                ? Math.max(0, gallery.scrollLeft - step)
-                : Math.min(gallery.scrollWidth - gallery.clientWidth, gallery.scrollLeft + step);
-            gallery.scrollTo({ left: target, behavior: 'smooth' });
+            const target = dir === 'left' ?
+                Math.max(0, gallery.scrollLeft - step) :
+                Math.min(gallery.scrollWidth - gallery.clientWidth, gallery.scrollLeft + step);
+            gallery.scrollTo({
+                left: target,
+                behavior: 'smooth'
+            });
         };
 
-        left.onclick = (e) => { e.stopPropagation(); scroll('left'); };
-        right.onclick = (e) => { e.stopPropagation(); scroll('right'); };
+        left.onclick = (e) => {
+            e.stopPropagation();
+            scroll('left');
+        };
+        right.onclick = (e) => {
+            e.stopPropagation();
+            scroll('right');
+        };
         gallery.addEventListener('scroll', update);
         setTimeout(update, 200);
     },
@@ -1367,10 +1482,15 @@ const Modal = {
         }
         container.style.display = 'flex';
 
-        container.appendChild(Utils.el('span', { className: 'modal-colors-label', text: 'Цвет:' }));
+        container.appendChild(Utils.el('span', {
+            className: 'modal-colors-label',
+            text: 'Цвет:'
+        }));
 
         display.forEach((color) => {
-            const option = Utils.el('label', { className: 'modal-color-option' });
+            const option = Utils.el('label', {
+                className: 'modal-color-option'
+            });
             const originalIndex = product.colors.findIndex(c => c.name === color.name);
 
             const radio = Utils.el('input', {
@@ -1384,7 +1504,9 @@ const Modal = {
                 },
             });
 
-            const nameSpan = Utils.el('span', { text: color.name });
+            const nameSpan = Utils.el('span', {
+                text: color.name
+            });
             option.appendChild(radio);
             option.appendChild(nameSpan);
             container.appendChild(option);
@@ -1432,10 +1554,14 @@ const Modal = {
             if (sep !== -1) {
                 const label = spec.substring(0, sep).trim();
                 const value = spec.substring(sep + 1).trim();
-                li = Utils.el('li', { className: 'spec-item' + (value.length > 30 ? ' spec-long-value' : '') });
+                li = Utils.el('li', {
+                    className: 'spec-item' + (value.length > 30 ? ' spec-long-value' : '')
+                });
                 li.innerHTML = `<span class="spec-label">${label}:</span><span class="spec-value">${value}</span>`;
             } else {
-                li = Utils.el('li', { className: 'spec-item' });
+                li = Utils.el('li', {
+                    className: 'spec-item'
+                });
                 li.innerHTML = `<span class="spec-value">${spec}</span>`;
             }
             if (index >= CONFIG.MAX_SPECS_BEFORE_COLLAPSE) li.style.display = 'none';
@@ -1464,10 +1590,19 @@ const Modal = {
         const parts = line.replace(/^ДОПОЛНИТЕЛЬНО\s*:/i, '').trim();
         return parts.split(',').map(s => s.trim()).filter(Boolean).map(item => {
             let m = item.match(/^(.*?)\s*-\s*([\d\s]+)\s*₽$/);
-            if (m) return { name: m[1].trim(), price: parseInt(m[2].replace(/\s/g, ''), 10) };
+            if (m) return {
+                name: m[1].trim(),
+                price: parseInt(m[2].replace(/\s/g, ''), 10)
+            };
             m = item.match(/^(.*?)\s*-\s*([\d\s]+)$/);
-            if (m) return { name: m[1].trim(), price: parseInt(m[2].replace(/\s/g, ''), 10) };
-            return { name: item.trim(), price: 0 };
+            if (m) return {
+                name: m[1].trim(),
+                price: parseInt(m[2].replace(/\s/g, ''), 10)
+            };
+            return {
+                name: item.trim(),
+                price: 0
+            };
         });
     },
 
@@ -1482,9 +1617,15 @@ const Modal = {
         const parts = line.replace(/^ВЫБРАТЬ ДРУГОЙ ВАРИАНТ ТОВАРА\s*:|^ВЫБРАТЬ ВЕРСИЮ РЕКВИЗИТА\s*:/i, '').trim();
         return parts.split(',').map(s => s.trim()).filter(Boolean).map(item => {
             let m = item.match(/^(.*?)\s*-\s*([\d\s]+)\s*₽$/);
-            if (m) return { name: m[1].trim(), price: parseInt(m[2].replace(/\s/g, ''), 10) };
+            if (m) return {
+                name: m[1].trim(),
+                price: parseInt(m[2].replace(/\s/g, ''), 10)
+            };
             m = item.match(/^(.*?)\s*-\s*([\d\s]+)$/);
-            if (m) return { name: m[1].trim(), price: parseInt(m[2].replace(/\s/g, ''), 10) };
+            if (m) return {
+                name: m[1].trim(),
+                price: parseInt(m[2].replace(/\s/g, ''), 10)
+            };
             return null;
         }).filter(Boolean);
     },
@@ -1561,7 +1702,9 @@ const Modal = {
             radio.checked = index === 0;
             radio.style.cssText = 'margin:0 8px 0 0;width:16px;height:16px;flex-shrink:0;';
 
-            const text = Utils.el('span', { text: `${v.name} - ${Utils.formatPrice(v.price)}` });
+            const text = Utils.el('span', {
+                text: `${v.name} - ${Utils.formatPrice(v.price)}`
+            });
             text.style.cssText = 'font-size:.95rem;color:var(--text-secondary);line-height:1;';
 
             wrapper.appendChild(radio);
@@ -1590,7 +1733,9 @@ const Modal = {
 
         const getColors = () => {
             const colors = {};
-            Utils.$$('select', grid).forEach(sel => { colors[sel.dataset.part] = sel.value; });
+            Utils.$$('select', grid).forEach(sel => {
+                colors[sel.dataset.part] = sel.value;
+            });
             return colors;
         };
         this._customColorsGetter = getColors;
@@ -1607,14 +1752,24 @@ const Modal = {
 
         Object.keys(product.parts).forEach(partKey => {
             const part = product.parts[partKey];
-            const wrapper = Utils.el('div', { className: 'customizer-item' });
-            const label = Utils.el('label', { text: part.label + ': ' });
+            const wrapper = Utils.el('div', {
+                className: 'customizer-item'
+            });
+            const label = Utils.el('label', {
+                text: part.label + ': '
+            });
 
-            const select = Utils.el('select', { attrs: { 'data-part': partKey } });
+            const select = Utils.el('select', {
+                attrs: {
+                    'data-part': partKey
+                }
+            });
             part.colors.forEach(color => {
                 select.appendChild(Utils.el('option', {
                     text: color.charAt(0).toUpperCase() + color.slice(1),
-                    attrs: { value: color },
+                    attrs: {
+                        value: color
+                    },
                 }));
             });
             select.value = part.colors[0];
@@ -1715,7 +1870,10 @@ const Modal = {
         }
 
         if (selectedVariant) {
-            selectedOptions.push({ name: 'Вариант: ' + selectedVariant.name, price: 0 });
+            selectedOptions.push({
+                name: 'Вариант: ' + selectedVariant.name,
+                price: 0
+            });
         }
 
         const basePrice = selectedVariant ? selectedVariant.price : Utils.parsePrice(product.price);
@@ -1753,9 +1911,9 @@ const Modal = {
     },
 };
 
-/* =========================================================================
+/*
  *  UI: ВЫПАДАЮЩИЙ КАТАЛОГ
- * ========================================================================= */
+ */
 const DropdownCatalog = {
     _closeTimer: null,
 
@@ -1855,14 +2013,19 @@ const DropdownCatalog = {
             content?.removeAttribute('style');
             DOM.categoriesRow?.classList.remove('shifted');
             document.body.classList.remove('dropdown-open');
-            DOM.catalogSection?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            DOM.catalogSection?.scrollIntoView({
+                behavior: 'smooth',
+                block: 'start'
+            });
         };
 
         // "Все категории"
         const allItem = Utils.el('div', {
             className: 'category-item' + (State.activeCategory === null ? ' active-drop' : ''),
             text: 'Все категории',
-            attrs: { 'data-category': '' },
+            attrs: {
+                'data-category': ''
+            },
         });
         allItem.style.color = 'var(--text-secondary)';
         allItem.addEventListener('click', (e) => {
@@ -1881,7 +2044,9 @@ const DropdownCatalog = {
             const item = Utils.el('div', {
                 className: 'category-item' + (cat === State.activeCategory ? ' active-drop' : ''),
                 text: cat,
-                attrs: { 'data-category': cat },
+                attrs: {
+                    'data-category': cat
+                },
             });
             item.style.color = CATEGORY_TEXT_COLORS[cat] || 'var(--text-secondary)';
             item.addEventListener('click', (e) => {
@@ -1914,9 +2079,9 @@ function closeAllDropdowns() {
     DOM.dropdownPickup?.classList.remove('show');
 }
 
-/* =========================================================================
+/*
  *  UI: ВЫПАДАЮЩИЕ ДОСТАВКА/САМОВЫВОЗ (десктоп)
- * ========================================================================= */
+ */
 const DesktopDropdowns = {
     init() {
         const bind = (btn, dropdown) => {
@@ -1934,7 +2099,7 @@ const DesktopDropdowns = {
         bind(DOM.desktopDeliveryBtn, DOM.dropdownDelivery);
         bind(DOM.desktopPickupBtn, DOM.dropdownPickup);
 
-        // Перезапрос после клонирования
+        // перезапрос после клонирования
         DOM.desktopDeliveryBtn = document.getElementById('desktopDeliveryBtn');
         DOM.desktopPickupBtn = document.getElementById('desktopPickupBtn');
 
@@ -1958,9 +2123,9 @@ const DesktopDropdowns = {
     },
 };
 
-/* =========================================================================
- *  UI: АНОНС
- * ========================================================================= */
+/*
+ *  UI: АНОНС (бегущая строка)
+ */
 const Announcement = {
     init() {
         const bar = DOM.announcementBar;
@@ -2013,9 +2178,9 @@ const Announcement = {
     },
 };
 
-/* =========================================================================
+/*
  *  UI: СКРОЛЛ
- * ========================================================================= */
+ */
 const Scroll = {
     modalSelectors: [
         '#modalOverlay', '#cartModal', '#checkoutModal',
@@ -2026,7 +2191,9 @@ const Scroll = {
 
     init() {
         State.lastScrollY = window.scrollY;
-        window.addEventListener('scroll', Utils.rafThrottle(() => this.handle()), { passive: true });
+        window.addEventListener('scroll', Utils.rafThrottle(() => this.handle()), {
+            passive: true
+        });
     },
 
     anyModalOpen() {
@@ -2079,9 +2246,9 @@ const Scroll = {
     },
 };
 
-/* =========================================================================
+/*
  *  UI: КАТЕГОРИИ (оверфлоу + видимость)
- * ========================================================================= */
+ */
 const Categories = {
     checkOverflow() {
         const wrapper = DOM.categoriesWrapper;
@@ -2093,7 +2260,9 @@ const Categories = {
 
     addFade() {
         if (DOM.categoriesWrapper && !DOM.categoriesWrapper.querySelector('.categories-fade')) {
-            DOM.categoriesWrapper.appendChild(Utils.el('div', { className: 'categories-fade' }));
+            DOM.categoriesWrapper.appendChild(Utils.el('div', {
+                className: 'categories-fade'
+            }));
         }
     },
 
@@ -2101,7 +2270,10 @@ const Categories = {
         const row = DOM.categoriesRow;
         if (!row) return;
         new MutationObserver(Utils.debounce(() => this.checkOverflow(), 100))
-            .observe(row, { childList: true, subtree: true });
+            .observe(row, {
+                childList: true,
+                subtree: true
+            });
         window.addEventListener('resize', Utils.debounce(() => this.checkOverflow(), 150));
     },
 
@@ -2124,9 +2296,9 @@ const Categories = {
     },
 };
 
-/* =========================================================================
+/*
  *  UI: МЕНЮ (бургер)
- * ========================================================================= */
+ */
 const Menu = {
     init() {
         const overlay = DOM.overlay;
@@ -2156,14 +2328,19 @@ const Menu = {
     },
 };
 
-/* =========================================================================
+/*
  *  UI: TOAST
- * ========================================================================= */
+ */
 const Toast = {
     show(message, duration = 2000) {
-        const toast = Utils.el('div', { className: 'toast-success', text: message });
+        const toast = Utils.el('div', {
+            className: 'toast-success',
+            text: message
+        });
         document.body.appendChild(toast);
-        requestAnimationFrame(() => { toast.style.opacity = '1'; });
+        requestAnimationFrame(() => {
+            toast.style.opacity = '1';
+        });
         setTimeout(() => {
             toast.style.opacity = '0';
             setTimeout(() => toast.remove(), 400);
@@ -2171,9 +2348,9 @@ const Toast = {
     },
 };
 
-/* =========================================================================
- *  UI: ТЕМА И ОГОНЬКИ
- * ========================================================================= */
+/*
+ *  UI: ТЕМА И ОГОНЬКИ (огоньки только для тёмной темы)
+ */
 const Theme = {
     init() {
         DOM.themeToggle?.addEventListener('click', () => {
@@ -2189,9 +2366,9 @@ const Theme = {
 
         if (DOM.themeIcon) DOM.themeIcon.textContent = theme === 'dark' ? '☀️' : '🌙';
         if (DOM.themeText) {
-            DOM.themeText.textContent = theme === 'dark'
-                ? 'Включить светлую тему'
-                : 'Включить тёмную тему';
+            DOM.themeText.textContent = theme === 'dark' ?
+                'Включить светлую тему' :
+                'Включить тёмную тему';
         }
         Fire.update(theme === 'dark');
     },
@@ -2217,7 +2394,9 @@ const Fire = {
             'rgba(255,220,80,0.8)', 'rgba(200,100,0,0.6)',
         ];
         for (let i = 0; i < 30; i++) {
-            const p = Utils.el('div', { className: 'fire-particle' });
+            const p = Utils.el('div', {
+                className: 'fire-particle'
+            });
             const size = 6 + Math.random() * 10;
             const color = colors[Math.floor(Math.random() * colors.length)];
             p.style.cssText = `
@@ -2243,19 +2422,25 @@ const Fire = {
             if (DOM.animIcon) DOM.animIcon.textContent = '⛔';
             if (DOM.animText) DOM.animText.textContent = 'Выключить огоньки';
             container.style.opacity = '1';
-            particles.forEach(p => { p.style.animation = ''; p.style.opacity = ''; });
+            particles.forEach(p => {
+                p.style.animation = '';
+                p.style.opacity = '';
+            });
         } else {
             if (DOM.animIcon) DOM.animIcon.textContent = '✨';
             if (DOM.animText) DOM.animText.textContent = 'Включить огоньки';
             container.style.opacity = '0';
-            particles.forEach(p => { p.style.animation = 'none'; p.style.opacity = '0'; });
+            particles.forEach(p => {
+                p.style.animation = 'none';
+                p.style.opacity = '0';
+            });
         }
     },
 };
 
-/* =========================================================================
+/*
  *  UI: ГЛОССАРИЙ
- * ========================================================================= */
+ */
 const Glossary = {
     init() {
         DOM.glossaryCloseBtn?.addEventListener('click', () => this.close());
@@ -2273,9 +2458,9 @@ const Glossary = {
     },
 };
 
-/* =========================================================================
+/*
  *  UI: ПРОЧИЕ МОДАЛКИ
- * ========================================================================= */
+ */
 const InfoModals = {
     init() {
         const bind = (openBtn, modal, closeEls) => {
@@ -2303,7 +2488,9 @@ const InfoModals = {
         document.addEventListener('keydown', (e) => {
             if (e.key !== 'Escape') return;
             [DOM.howToBuyModal, DOM.pickupModal, DOM.jugglingNewsModal, DOM.fireNewsModal, DOM.festivalsModal]
-                .forEach(m => { if (m?.classList.contains('active')) this.closeModal(m); });
+            .forEach(m => {
+                if (m?.classList.contains('active')) this.closeModal(m);
+            });
         });
     },
 
@@ -2322,9 +2509,9 @@ const InfoModals = {
     },
 };
 
-/* =========================================================================
- *  UI: ПАРТНЁРЫ
- * ========================================================================= */
+/*
+ *  UI: ПАРТНЁРЫ (Лидеры цирковой сцены)
+ */
 const Partners = {
     init() {
         const header = DOM.partnersHeader;
@@ -2338,7 +2525,7 @@ const Partners = {
 
             if (isOpen) {
                 collapsible.style.display = 'block';
-                // Перезагрузка img для корректного отображения
+                // перезагрузка img для корректного отображения
                 Utils.$$('img', collapsible).forEach(img => {
                     if (!img.complete || img.naturalWidth === 0) {
                         const src = img.src;
@@ -2346,18 +2533,22 @@ const Partners = {
                         img.src = src;
                     }
                 });
-                setTimeout(() => { collapsible.style.opacity = '1'; }, 50);
+                setTimeout(() => {
+                    collapsible.style.opacity = '1';
+                }, 50);
             } else {
                 collapsible.style.opacity = '0';
-                setTimeout(() => { collapsible.style.display = 'none'; }, 300);
+                setTimeout(() => {
+                    collapsible.style.display = 'none';
+                }, 300);
             }
         });
     },
 };
 
-/* =========================================================================
+/*
  *  UI: НАСТРОЙКИ
- * ========================================================================= */
+ */
 const Settings = {
     init() {
         const toggle = document.querySelector('.settings-toggle');
@@ -2371,9 +2562,9 @@ const Settings = {
     },
 };
 
-/* =========================================================================
+/*
  *  UI: КОНТАКТЫ
- * ========================================================================= */
+ */
 const Contacts = {
     init() {
         const toggle = document.querySelector('.contacts-toggle');
@@ -2394,9 +2585,9 @@ const Contacts = {
     },
 };
 
-/* =========================================================================
+/*
  *  UI: ОФОРМЛЕНИЕ ЗАКАЗА
- * ========================================================================= */
+ */
 const Checkout = {
     init() {
         DOM.cartIcon?.addEventListener('click', () => this.openCart());
@@ -2424,7 +2615,7 @@ const Checkout = {
         });
         DOM.submitOrderBtn?.addEventListener('click', () => this.submit());
 
-        // Доставка
+        // доставка
         Utils.$$('input[name="delivery"]').forEach(radio => {
             radio.addEventListener('change', () => {
                 this.toggleDeliveryBlock();
@@ -2500,9 +2691,18 @@ const Checkout = {
 
         if (selected) {
             switch (selected.value) {
-                case 'pickup': deliveryCost = 0; deliveryText = 'Самовывоз (0 ₽)'; break;
-                case 'moscow': deliveryCost = CONFIG.DELIVERY_COST_MOSCOW; deliveryText = `Доставка по Москве (${CONFIG.DELIVERY_COST_MOSCOW} ₽)`; break;
-                case 'cdek': deliveryCost = 0; deliveryText = 'СДЭК (рассчитывается отдельно)'; break;
+                case 'pickup':
+                    deliveryCost = 0;
+                    deliveryText = 'Самовывоз (0 ₽)';
+                    break;
+                case 'moscow':
+                    deliveryCost = CONFIG.DELIVERY_COST_MOSCOW;
+                    deliveryText = `Доставка по Москве (${CONFIG.DELIVERY_COST_MOSCOW} ₽)`;
+                    break;
+                case 'cdek':
+                    deliveryCost = 0;
+                    deliveryText = 'СДЭК (рассчитывается отдельно)';
+                    break;
             }
         }
 
@@ -2573,8 +2773,12 @@ const Checkout = {
         const total = Utils.formatPrice(Cart.totalPrice());
         const now = new Date();
         const orderDate = now.toLocaleString('ru-RU', {
-            day: '2-digit', month: '2-digit', year: 'numeric',
-            hour: '2-digit', minute: '2-digit', second: '2-digit',
+            day: '2-digit',
+            month: '2-digit',
+            year: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit',
+            second: '2-digit',
         });
 
         const itemsText = State.cart.map((item, i) => {
@@ -2605,12 +2809,17 @@ const Checkout = {
         ].join('-');
         Utils.downloadTextFile(`заказ_${dateStr}_${timeStr}.txt`, fileContent);
 
-        // Сохраняем заказ
+        // сохранение заказа
         const orders = Utils.safeJSON(localStorage.getItem(CONFIG.ORDERS_KEY)) || [];
         orders.push({
             id: Date.now(),
             date: orderDate,
-            name, phone, email, address, delivery: deliveryInfo, comment,
+            name,
+            phone,
+            email,
+            address,
+            delivery: deliveryInfo,
+            comment,
             items: State.cart.map(item => ({
                 name: item.name,
                 quantity: item.quantity,
@@ -2648,9 +2857,9 @@ const Checkout = {
     },
 };
 
-/* =========================================================================
+/*
  *  UI: АВТОДОПОЛНЕНИЕ ГОРОДОВ/СТРАН
- * ========================================================================= */
+ */
 const Autocomplete = {
     init() {
         this.initCountry();
@@ -2665,7 +2874,10 @@ const Autocomplete = {
 
         input.addEventListener('input', () => {
             const val = input.value.toLowerCase();
-            if (val.length < 2) { box.style.display = 'none'; return; }
+            if (val.length < 2) {
+                box.style.display = 'none';
+                return;
+            }
             const matched = COUNTRY_LIST.filter(c => c.toLowerCase().includes(val));
             box.innerHTML = matched.map(c =>
                 `<div style="padding:6px 12px;cursor:pointer;border-bottom:1px solid var(--border-card);" data-value="${c.replace(/"/g, '&quot;')}">${c}</div>`
@@ -2680,7 +2892,9 @@ const Autocomplete = {
             box.style.display = 'none';
         });
 
-        input.addEventListener('blur', () => setTimeout(() => { box.style.display = 'none'; }, 200));
+        input.addEventListener('blur', () => setTimeout(() => {
+            box.style.display = 'none';
+        }, 200));
     },
 
     initCity() {
@@ -2690,7 +2904,10 @@ const Autocomplete = {
 
         input.addEventListener('input', () => {
             const val = input.value.trim().toLowerCase();
-            if (val.length < 2) { box.style.display = 'none'; return; }
+            if (val.length < 2) {
+                box.style.display = 'none';
+                return;
+            }
             const matched = State.cities.filter(c => c.toLowerCase().includes(val));
             box.innerHTML = matched.map(c =>
                 `<div style="padding:6px 12px;cursor:pointer;border-bottom:1px solid var(--border-card);" data-value="${c.replace(/"/g, '&quot;')}">${c}</div>`
@@ -2706,9 +2923,11 @@ const Autocomplete = {
             Api.loadPickupPoints(input.value);
         });
 
-        input.addEventListener('blur', () => setTimeout(() => { box.style.display = 'none'; }, 200));
+        input.addEventListener('blur', () => setTimeout(() => {
+            box.style.display = 'none';
+        }, 200));
 
-        // Дебаунс загрузки пунктов
+        // дебаунс загрузки пунктов (пользователь печатает город в поле, а запрос к серверу за пунктами выдачи отправляется не на каждую букву, а только когда он перестал печатать)
         const debouncedLoad = Utils.debounce((city) => {
             if (city.length >= 2) Api.loadPickupPoints(city);
             else if (DOM.cdekPickupBlock) DOM.cdekPickupBlock.style.display = 'none';
@@ -2723,7 +2942,10 @@ const Autocomplete = {
 
         input.addEventListener('input', () => {
             const val = input.value.trim().toLowerCase();
-            if (val.length < 2) { box.style.display = 'none'; return; }
+            if (val.length < 2) {
+                box.style.display = 'none';
+                return;
+            }
             const matched = State.pickupPoints.filter(addr => addr.toLowerCase().includes(val));
             box.innerHTML = matched.map(addr =>
                 `<div style="padding:6px 12px;cursor:pointer;border-bottom:1px solid var(--border-card);" data-value="${addr.replace(/"/g, '&quot;')}">${addr}</div>`
@@ -2740,25 +2962,30 @@ const Autocomplete = {
             const select = DOM.cdekPickup;
             if (select) {
                 for (const opt of select.options) {
-                    if (opt.value === value) { select.value = value; break; }
+                    if (opt.value === value) {
+                        select.value = value;
+                        break;
+                    }
                 }
             }
         });
 
-        input.addEventListener('blur', () => setTimeout(() => { box.style.display = 'none'; }, 200));
+        input.addEventListener('blur', () => setTimeout(() => {
+            box.style.display = 'none';
+        }, 200));
     },
 };
 
-/* =========================================================================
+/*
  *  ИНИЦИАЛИЗАЦИЯ
- * ========================================================================= */
+ */
 async function loadAllImages() {
     const catalog = DOM.catalogContainer;
     if (catalog) {
         catalog.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:2rem;color:var(--text-muted);">⏳ Загрузка изображений...</div>';
     }
 
-    // Логотипы
+    // логотипы
     const logoUrl = CONFIG.LOGO_FILE ? CONFIG.GITHUB_BASE_URL + CONFIG.LOGO_FILE : null;
     [DOM.logoImage, DOM.menuLogo, DOM.mobileLogo].forEach(img => {
         if (!img) return;
@@ -2770,7 +2997,7 @@ async function loadAllImages() {
         }
     });
 
-    // Нормализация URL изображений товаров
+    // нормализация URL изображений товаров
     for (const product of State.products) {
         if (product.imageFile) product.image = CONFIG.GITHUB_BASE_URL + product.imageFile;
         if (product.images?.length) {
@@ -2778,7 +3005,10 @@ async function loadAllImages() {
         }
         if (product.colors?.length) {
             for (const color of product.colors) {
-                if (color.name === 'Стандарт') { color.image = product.image; continue; }
+                if (color.name === 'Стандарт') {
+                    color.image = product.image;
+                    continue;
+                }
                 if (color.image && !color.image.startsWith('http')) {
                     color.image = CONFIG.GITHUB_BASE_URL + color.image;
                 }
@@ -2795,12 +3025,12 @@ async function loadAllImages() {
 async function init() {
     cacheDOM();
 
-    // 1. Загрузка данных
+    // загрузка данных
     Cart.load();
     await Api.loadProducts();
     await loadAllImages();
 
-    // 2. Глобальные UI-модули
+    // глобальные UI-модули
     Theme.init();
     Fire.init();
     Announcement.init();
@@ -2812,7 +3042,7 @@ async function init() {
     Settings.init();
     Contacts.init();
 
-    // 3. Каталог и корзина
+    // каталог и корзина
     DropdownCatalog.init();
     DesktopDropdowns.init();
     CartUI.bindEvents();
@@ -2820,7 +3050,7 @@ async function init() {
     Modal.bindGlobalEvents();
     Autocomplete.init();
 
-    // 4. Категории
+    // категории
     Categories.updateVisibility();
     Categories.addFade();
     Categories.observe();
@@ -2832,22 +3062,20 @@ async function init() {
     });
     window.addEventListener('resize', () => Categories.updateVisibility());
 
-    // 5. Партнёры (после загрузки логотипов)
+    // партнёры (после загрузки логотипов)
     await Api.loadPartnerLogos();
 
-    // 6. Города
+    // города
     await Api.loadCities();
 
-    // 7. Сортировка
+    // сортировка
     DOM.sortSelect?.addEventListener('change', (e) => {
         State.sortOrder = e.target.value;
         CatalogUI.renderCatalog();
     });
-
-    console.log('[Init] Магазин FireMag готов ✅');
 }
 
-// Старт
+// старт (ПОЕХАЛИ! 😊 )
 if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', init);
 } else {
