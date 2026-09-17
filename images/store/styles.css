@@ -443,7 +443,6 @@ body {
 .dropdown-categories-list {
     max-height: 70vh;
     overflow-y: auto;
-    min-width: 320px;
     flex-shrink: 0;
 }
 
@@ -4121,11 +4120,11 @@ body,
     .dropdown-content.show {
         display: block !important;
         position: fixed !important;
-        top: 140px !important;
+        top: 110px !important;
         left: 50% !important;
         transform: translateX(-50%) !important;
         width: max-content !important;
-		min-width: 320px !important;
+		min-width: 360px !important;
         max-width: calc(100% - 20px) !important;
         max-height: calc(100vh - 90px) !important;
         overflow-y: auto !important;
