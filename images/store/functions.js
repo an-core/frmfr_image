@@ -1916,6 +1916,8 @@ const Modal = {
  */
 const DropdownCatalog = {
     _closeTimer: null,
+    _hideTimer: null,
+    _submenu: null,
 
     init() {
         const desktopBtn = document.querySelector('.dropdown-btn');
@@ -1937,6 +1939,7 @@ const DropdownCatalog = {
                 content.classList.remove('show');
                 DOM.categoriesRow?.classList.remove('shifted');
                 document.body.classList.remove('dropdown-open');
+                this.hideSubmenu();
             }
         };
 
@@ -1999,7 +2002,103 @@ const DropdownCatalog = {
                 CatalogUI.renderSubcategories();
                 CatalogUI.renderCatalog();
             }
+            this.hideSubmenu();
         });
+    },
+
+    isDesktopHover() {
+        return window.innerWidth >= 768 &&
+            window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+    },
+
+    showSubmenu(category, anchorEl) {
+        const submenu = this._submenu;
+        if (!submenu) return;
+
+        this.cancelHide();
+
+        const subs = CatalogUI.getSubcategories(category);
+        if (subs.length <= 1) {
+            submenu.classList.remove('visible');
+            submenu.innerHTML = '';
+            return;
+        }
+
+        submenu.innerHTML = '';
+        subs.forEach(sub => {
+            const count = sub === 'Все' ?
+                State.products.filter(p => p.category === category).length :
+                State.products.filter(p => p.category === category && p.subcategory === sub).length;
+
+            const item = Utils.el('div', {
+                className: 'dropdown-submenu-item' +
+                    (sub === State.activeSubcategory && State.activeCategory === category ?
+                        ' active-sub' :
+                        ''),
+                attrs: {
+                    'data-sub': sub,
+                    'data-cat': category
+                },
+            });
+            item.innerHTML = `${sub}<span class="sub-count">${count}</span>`;
+
+            item.addEventListener('click', (e) => {
+                e.stopPropagation();
+                State.activeCategory = category;
+                State.activeSubcategory = sub;
+                CatalogUI.renderCategories();
+                CatalogUI.renderSubcategories();
+                CatalogUI.renderCatalog();
+                this.syncActive();
+
+                DOM.dropdownContent?.classList.remove('show');
+                DOM.categoriesRow?.classList.remove('shifted');
+                document.body.classList.remove('dropdown-open');
+                this.hideSubmenu();
+                DOM.catalogSection?.scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'start'
+                });
+            });
+
+            submenu.appendChild(item);
+        });
+
+        submenu.classList.add('visible');
+
+        requestAnimationFrame(() => {
+            const rect = anchorEl.getBoundingClientRect();
+            const menuRect = submenu.getBoundingClientRect();
+            const overflowRight = rect.right + menuRect.width + 20 > window.innerWidth;
+
+            if (overflowRight) {
+                submenu.style.left = 'auto';
+                submenu.style.right = '100%';
+                submenu.style.marginLeft = '0';
+                submenu.style.marginRight = '4px';
+            } else {
+                submenu.style.left = '100%';
+                submenu.style.right = 'auto';
+                submenu.style.marginLeft = '4px';
+                submenu.style.marginRight = '0';
+            }
+        });
+    },
+
+    hideSubmenu() {
+        this._submenu?.classList.remove('visible');
+    },
+
+    scheduleHide() {
+        this.cancelHide();
+        this._hideTimer = setTimeout(() => this.hideSubmenu(), 250);
+    },
+
+    cancelHide() {
+        if (this._hideTimer) {
+            clearTimeout(this._hideTimer);
+            this._hideTimer = null;
+        }
     },
 
     populate() {
@@ -2007,19 +2106,28 @@ const DropdownCatalog = {
         if (!container) return;
         container.innerHTML = '';
 
+        const wrap = Utils.el('div', {
+            className: 'dropdown-hover-wrap'
+        });
+
+        const categoriesList = Utils.el('div', {
+            className: 'dropdown-categories-list'
+        });
+        categoriesList.style.minWidth = '200px';
+
         const closeAndScroll = () => {
-            const content = DOM.dropdownContent;
-            content?.classList.remove('show');
-            content?.removeAttribute('style');
+            DOM.dropdownContent?.classList.remove('show');
+            DOM.dropdownContent?.removeAttribute('style');
             DOM.categoriesRow?.classList.remove('shifted');
             document.body.classList.remove('dropdown-open');
+            this.hideSubmenu();
             DOM.catalogSection?.scrollIntoView({
                 behavior: 'smooth',
                 block: 'start'
             });
         };
 
-        // "Все категории"
+        // «Все категории»
         const allItem = Utils.el('div', {
             className: 'category-item' + (State.activeCategory === null ? ' active-drop' : ''),
             text: 'Все категории',
@@ -2038,8 +2146,10 @@ const DropdownCatalog = {
             this.syncActive();
             closeAndScroll();
         });
-        container.appendChild(allItem);
+        allItem.addEventListener('mouseenter', () => this.hideSubmenu());
+        categoriesList.appendChild(allItem);
 
+        // категории
         for (const cat of CatalogUI.getCategories()) {
             const item = Utils.el('div', {
                 className: 'category-item' + (cat === State.activeCategory ? ' active-drop' : ''),
@@ -2049,6 +2159,7 @@ const DropdownCatalog = {
                 },
             });
             item.style.color = CATEGORY_TEXT_COLORS[cat] || 'var(--text-secondary)';
+
             item.addEventListener('click', (e) => {
                 e.stopPropagation();
                 State.activeCategory = cat;
@@ -2059,14 +2170,43 @@ const DropdownCatalog = {
                 this.syncActive();
                 closeAndScroll();
             });
-            container.appendChild(item);
+
+            item.addEventListener('mouseenter', () => {
+                if (!this.isDesktopHover()) return;
+                this.showSubmenu(cat, item);
+            });
+
+            categoriesList.appendChild(item);
         }
+
+        wrap.appendChild(categoriesList);
+
+        // панель подкатегорий
+        const submenu = Utils.el('div', {
+            className: 'dropdown-submenu'
+        });
+        wrap.appendChild(submenu);
+        this._submenu = submenu;
+
+        wrap.addEventListener('mouseleave', () => {
+            if (!this.isDesktopHover()) return;
+            this.scheduleHide();
+        });
+        wrap.addEventListener('mouseenter', () => {
+            if (!this.isDesktopHover()) return;
+            this.cancelHide();
+        });
+
+        container.appendChild(wrap);
     },
 
     syncActive() {
         Utils.$$('.dropdown-content .category-item').forEach(item => {
             const cat = item.dataset.category;
-            item.classList.toggle('active-drop', cat === '' ? State.activeCategory === null : cat === State.activeCategory);
+            item.classList.toggle(
+                'active-drop',
+                cat === '' ? State.activeCategory === null : cat === State.activeCategory
+            );
         });
     },
 };
@@ -3062,7 +3202,7 @@ async function init() {
     });
     window.addEventListener('resize', () => Categories.updateVisibility());
 
-    // партнёры (после загрузки логотипов)
+    // партнёры
     await Api.loadPartnerLogos();
 
     // города
