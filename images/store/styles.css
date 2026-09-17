@@ -449,6 +449,7 @@ body {
 .dropdown-content.show {
     display: block;
     animation: fadeDown 0.2s ease;
+	margin-left: -55px;
 }
 
 .dropdown-hover-wrap {
