@@ -1419,7 +1419,7 @@ body {
     font-size: 1.25rem;
     color: var(--text-primary);
     margin-bottom: .3rem;
-    line-height: .3;
+    line-height: 2;
 }
 
 .product-price {
