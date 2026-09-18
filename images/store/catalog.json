@@ -31,25 +31,10 @@
                 "image": null,
                 "imageIndex": -1
             },
-            {
-                "name": "Синий",
-                "hex": "#1a5fb4",
-                "image": "images/clubs/delphin_long/delphin_long_training_7.png"
-            },
-            {
-                "name": "Красный",
-                "hex": "#c0392b",
-                "image": "images/clubs/delphin_long/delphin_long_training_4.png"
-            },
-            {
-                "name": "Зелёный",
-                "hex": "#27ae60",
-                "image": "images/clubs/delphin_long/delphin_long_training_6.png"
-            },
-            {
-                "name": "Жёлтый",
-                "hex": "#f1c40f",
-                "image": "images/clubs/delphin_long/delphin_long_training_9.png"
+			{
+                "name": "Белый/Чёрный",
+                "hex": "#f0f0f0",
+                "image": "images/clubs/delphin_long/delphin_long_training_2.png"
             },
             {
                 "name": "Оранжевый",
@@ -57,24 +42,39 @@
                 "image": "images/clubs/delphin_long/delphin_long_training_3.png"
             },
             {
+                "name": "Красный",
+                "hex": "#c0392b",
+                "image": "images/clubs/delphin_long/delphin_long_training_4.png"
+            },
+			{
+                "name": "Фиолетовый",
+                "hex": "#6c3483",
+                "image": "images/clubs/delphin_long/delphin_long_training_5.png"
+            },
+            {
+                "name": "Зелёный",
+                "hex": "#27ae60",
+                "image": "images/clubs/delphin_long/delphin_long_training_6.png"
+            },
+			{
+                "name": "Синий",
+                "hex": "#1a5fb4",
+                "image": "images/clubs/delphin_long/delphin_long_training_7.png"
+            },       
+            {
                 "name": "Розовый",
                 "hex": "#e84393",
                 "image": "images/clubs/delphin_long/delphin_long_training_8.png"
             },
-            {
-                "name": "Фиолетовый",
-                "hex": "#6c3483",
-                "image": "images/clubs/delphin_long/delphin_long_training_5.png"
+			{
+                "name": "Жёлтый",
+                "hex": "#f1c40f",
+                "image": "images/clubs/delphin_long/delphin_long_training_9.png"
             },
 			{
                 "name": "Белый",
                 "hex": "#f0f0f0",
                 "image": "images/clubs/delphin_long/delphin_long_training_10.png"
-            },
-            {
-                "name": "Белый/Чёрный",
-                "hex": "#f0f0f0",
-                "image": "images/clubs/delphin_long/delphin_long_training_2.png"
             }
         ]
     },
