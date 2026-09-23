@@ -3649,7 +3649,7 @@
 	{
 		"id": 47,
 		"name": "Светодиодные пои Drop",
-		"price": "9 400 ₽",
+		"price": "9 600 ₽",
 		"category": "Светодиодный реквизит",
 		"subcategory": "Пои светодиодные",
 		"imageFile": "images/light/poi/drop/drop.png",
@@ -3674,7 +3674,7 @@
 	{
 		"id": 66,
 		"name": "Светодиодные пои Spectrum",
-		"price": "5 900 ₽",
+		"price": "7 100 ₽",
 		"category": "Светодиодный реквизит",
 		"subcategory": "Пои светодиодные",
 		"imageFile": "images/light/poi/spectrum/spectrum.png",
@@ -3700,7 +3700,7 @@
 	{
 		"id": 49,
 		"name": "Светодиодные пои Loop",
-		"price": "4 950 ₽",
+		"price": "5 150 ₽",
 		"category": "Светодиодный реквизит",
 		"subcategory": "Пои светодиодные",
 		"imageFile": "images/light/poi/loop/loop.png",
