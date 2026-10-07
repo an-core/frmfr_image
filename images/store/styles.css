@@ -2749,7 +2749,7 @@ input[readonly] {
 
 #logoImage {
     width: auto;
-    margin-top: -100px !important;
+    margin-top: -40px !important;
     transform: translateY(-10px);
     max-height: 180px;
     max-width: 350px;
