@@ -1035,7 +1035,7 @@ body {
     color: var(--text-primary);
     padding-left: 0;
     transition: color .25s;
-    margin-top: -120px;
+    margin-top: -40px;
 }
 
 .header-left .subhead {
